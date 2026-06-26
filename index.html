@@ -8,7 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@900&display=swap');
     body { font-family: 'Inter', sans-serif; }
     .step-active { background: #2d6a4f; color: white; }
     .step-done { background: #74c69d; color: white; }
@@ -61,39 +61,33 @@
 <!-- HEADER -->
 <header class="bg-white border-b border-gray-200 no-print">
   <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-4">
-      <!-- Logo Terre à Terre -->
-      <svg width="180" height="52" viewBox="0 0 180 52" xmlns="http://www.w3.org/2000/svg">
-        <!-- Wheat icon in circle -->
-        <circle cx="26" cy="26" r="23.5" fill="none" stroke="#4a7c40" stroke-width="2.2"/>
-        <!-- Stem -->
-        <line x1="26" y1="44" x2="26" y2="10" stroke="#4a7c40" stroke-width="2" stroke-linecap="round"/>
-        <!-- Top terminal leaf -->
-        <ellipse cx="26" cy="11" rx="2.8" ry="4.5" fill="#4a7c40"/>
-        <!-- Leaf pair 1 (upper) -->
-        <path d="M26 17 Q20 14 17 11" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <path d="M26 17 Q32 14 35 11" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <ellipse cx="17" cy="11" rx="3.5" ry="2" transform="rotate(-35 17 11)" fill="#4a7c40"/>
-        <ellipse cx="35" cy="11" rx="3.5" ry="2" transform="rotate(35 35 11)" fill="#4a7c40"/>
-        <!-- Leaf pair 2 -->
-        <path d="M26 23 Q19 20 15 17" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <path d="M26 23 Q33 20 37 17" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <ellipse cx="15" cy="17" rx="3.5" ry="2" transform="rotate(-35 15 17)" fill="#4a7c40"/>
-        <ellipse cx="37" cy="17" rx="3.5" ry="2" transform="rotate(35 37 17)" fill="#4a7c40"/>
-        <!-- Leaf pair 3 -->
-        <path d="M26 30 Q19 27 15 24" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <path d="M26 30 Q33 27 37 24" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <ellipse cx="15" cy="24" rx="3.5" ry="2" transform="rotate(-35 15 24)" fill="#4a7c40"/>
-        <ellipse cx="37" cy="24" rx="3.5" ry="2" transform="rotate(35 37 24)" fill="#4a7c40"/>
-        <!-- Leaf pair 4 (lower) -->
-        <path d="M26 37 Q20 34 16 31" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <path d="M26 37 Q32 34 36 31" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <ellipse cx="16" cy="31" rx="3.5" ry="2" transform="rotate(-35 16 31)" fill="#4a7c40"/>
-        <ellipse cx="36" cy="31" rx="3.5" ry="2" transform="rotate(35 36 31)" fill="#4a7c40"/>
-        <!-- Text: TERRE À TERRE -->
-        <text x="58" y="22" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="13.5" font-weight="900" fill="#4a7c40" letter-spacing="2.5">TERRE À TERRE</text>
-        <text x="58" y="38" font-family="Arial, sans-serif" font-size="8" fill="#7a9e70" letter-spacing="1">Fiduciaire agricole · Suisse romande</text>
+    <div class="flex items-center gap-3">
+      <!-- Icône TAT : cercle + épi de blé (fidèle au logo officiel) -->
+      <svg width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cercle épais -->
+        <circle cx="50" cy="50" r="44" fill="white" stroke="#4a7c40" stroke-width="7"/>
+        <!-- Tige centrale -->
+        <line x1="50" y1="83" x2="50" y2="16" stroke="#4a7c40" stroke-width="5" stroke-linecap="round"/>
+        <!-- Feuille terminale (pointe haute) -->
+        <ellipse cx="50" cy="15" rx="7.5" ry="12" fill="#4a7c40"/>
+        <!-- Paire 1 haute – gauche -->
+        <ellipse cx="33" cy="29" rx="12" ry="6.5" transform="rotate(-48 33 29)" fill="#4a7c40"/>
+        <!-- Paire 1 haute – droite -->
+        <ellipse cx="67" cy="29" rx="12" ry="6.5" transform="rotate(48 67 29)" fill="#4a7c40"/>
+        <!-- Paire 2 milieu – gauche -->
+        <ellipse cx="28" cy="46" rx="13" ry="7" transform="rotate(-42 28 46)" fill="#4a7c40"/>
+        <!-- Paire 2 milieu – droite -->
+        <ellipse cx="72" cy="46" rx="13" ry="7" transform="rotate(42 72 46)" fill="#4a7c40"/>
+        <!-- Paire 3 basse – gauche -->
+        <ellipse cx="31" cy="63" rx="12" ry="6.5" transform="rotate(-35 31 63)" fill="#4a7c40"/>
+        <!-- Paire 3 basse – droite -->
+        <ellipse cx="69" cy="63" rx="12" ry="6.5" transform="rotate(35 69 63)" fill="#4a7c40"/>
       </svg>
+      <!-- Texte du logo -->
+      <div>
+        <div style="font-family:'Nunito','Arial Rounded MT Bold',Arial,sans-serif;font-size:19px;font-weight:900;color:#4a7c40;letter-spacing:3px;line-height:1.15">TERRE À TERRE</div>
+        <div style="font-family:Inter,Arial,sans-serif;font-size:9px;color:#7a9e70;letter-spacing:0.8px;margin-top:1px">Fiduciaire agricole · Suisse romande</div>
+      </div>
     </div>
     <div class="text-right">
       <div class="text-sm font-semibold text-gray-700">Calcul Valeur de Rendement Agricole</div>
