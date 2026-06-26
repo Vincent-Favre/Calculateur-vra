@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valeur de Rendement Agricole – Terre à Terre</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .step-active { background: #2d6a4f; color: white; }
+    .step-done { background: #74c69d; color: white; }
+    .step-pending { background: #e9ecef; color: #6c757d; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    input, select, textarea { transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #2d6a4f; box-shadow: 0 0 0 3px rgba(45,106,79,0.1); }
+    .btn-primary { background: #2d6a4f; color: white; transition: background 0.2s; }
+    .btn-primary:hover { background: #1b4332; }
+    .btn-secondary { background: #f8f9fa; color: #2d6a4f; border: 1.5px solid #2d6a4f; transition: all 0.2s; }
+    .btn-secondary:hover { background: #2d6a4f; color: white; }
+    .btn-danger { background: #fee2e2; color: #dc2626; transition: all 0.2s; }
+    .btn-danger:hover { background: #dc2626; color: white; }
+    .parcel-card { border-left: 4px solid #2d6a4f; }
+    .building-card { border-left: 4px solid #74c69d; }
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white; }
+      .card { box-shadow: none; border: 1px solid #dee2e6; }
+    }
+    .print-only { display: none; }
+    .tooltip { position: relative; }
+    .tooltip .tooltiptext {
+      visibility: hidden; background: #333; color: #fff; text-align: left;
+      border-radius: 6px; padding: 8px 10px; position: absolute; z-index: 100;
+      bottom: 125%; left: 0; min-width: 220px; font-size: 12px; line-height: 1.4;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .tooltip:hover .tooltiptext { visibility: visible; }
+    .vr-result { background: linear-gradient(135deg, #2d6a4f, #40916c); color: white; border-radius: 12px; }
+    /* ── Help Drawer ── */
+    .help-drawer { position:fixed; top:0; right:-430px; width:410px; height:100vh; background:white; border-left:3px solid #4a7c40; z-index:1000; transition:right 0.3s ease; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.14); }
+    .help-drawer.open { right:0; }
+    .help-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.18); z-index:999; display:none; }
+    .help-overlay.open { display:block; }
+    .help-btn { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:#4a7c40; color:white; font-size:9px; font-weight:bold; cursor:pointer; margin-left:4px; flex-shrink:0; border:none; line-height:1; vertical-align:middle; padding:0; }
+    .help-btn:hover { background:#1b4332; }
+    /* ── Step Guide ── */
+    .step-guide { font-size:12px; }
+    .step-guide summary { cursor:pointer; font-weight:600; color:#2d6a4f; user-select:none; list-style:none; display:flex; align-items:center; gap:6px; }
+    .step-guide summary::-webkit-details-marker { display:none; }
+    .step-guide summary::after { content:'▸'; margin-left:auto; font-size:10px; color:#74c69d; transition:transform 0.2s; }
+    details[open].step-guide summary::after { transform:rotate(90deg); }
+    .step-guide summary:hover { text-decoration:none; color:#1b4332; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white border-b border-gray-200 no-print">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <!-- Logo Terre à Terre -->
+      <svg width="180" height="52" viewBox="0 0 180 52" xmlns="http://www.w3.org/2000/svg">
+        <!-- Wheat icon in circle -->
+        <circle cx="26" cy="26" r="23.5" fill="none" stroke="#4a7c40" stroke-width="2.2"/>
+        <!-- Stem -->
+        <line x1="26" y1="44" x2="26" y2="10" stroke="#4a7c40" stroke-width="2" stroke-linecap="round"/>
+        <!-- Top terminal leaf -->
+        <ellipse cx="26" cy="11" rx="2.8" ry="4.5" fill="#4a7c40"/>
+        <!-- Leaf pair 1 (upper) -->
+        <path d="M26 17 Q20 14 17 11" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 17 Q32 14 35 11" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <ellipse cx="17" cy="11" rx="3.5" ry="2" transform="rotate(-35 17 11)" fill="#4a7c40"/>
+        <ellipse cx="35" cy="11" rx="3.5" ry="2" transform="rotate(35 35 11)" fill="#4a7c40"/>
+        <!-- Leaf pair 2 -->
+        <path d="M26 23 Q19 20 15 17" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 23 Q33 20 37 17" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <ellipse cx="15" cy="17" rx="3.5" ry="2" transform="rotate(-35 15 17)" fill="#4a7c40"/>
+        <ellipse cx="37" cy="17" rx="3.5" ry="2" transform="rotate(35 37 17)" fill="#4a7c40"/>
+        <!-- Leaf pair 3 -->
+        <path d="M26 30 Q19 27 15 24" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 30 Q33 27 37 24" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <ellipse cx="15" cy="24" rx="3.5" ry="2" transform="rotate(-35 15 24)" fill="#4a7c40"/>
+        <ellipse cx="37" cy="24" rx="3.5" ry="2" transform="rotate(35 37 24)" fill="#4a7c40"/>
+        <!-- Leaf pair 4 (lower) -->
+        <path d="M26 37 Q20 34 16 31" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 37 Q32 34 36 31" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <ellipse cx="16" cy="31" rx="3.5" ry="2" transform="rotate(-35 16 31)" fill="#4a7c40"/>
+        <ellipse cx="36" cy="31" rx="3.5" ry="2" transform="rotate(35 36 31)" fill="#4a7c40"/>
+        <!-- Text: TERRE À TERRE -->
+        <text x="58" y="22" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="13.5" font-weight="900" fill="#4a7c40" letter-spacing="2.5">TERRE À TERRE</text>
+        <text x="58" y="38" font-family="Arial, sans-serif" font-size="8" fill="#7a9e70" letter-spacing="1">Fiduciaire agricole · Suisse romande</text>
+      </svg>
+    </div>
+    <div class="text-right">
+      <div class="text-sm font-semibold text-gray-700">Calcul Valeur de Rendement Agricole</div>
+      <div class="text-xs text-gray-400">Guide ODFR – Révision 2018 · Période 2009–2024</div>
+    </div>
+  </div>
+</header>
+
+<!-- STEP INDICATORS -->
+<div class="no-print bg-white border-b border-gray-100 sticky top-0 z-20 shadow-sm">
+  <div class="max-w-5xl mx-auto px-6 py-3">
+    <div class="flex items-center gap-1 overflow-x-auto">
+      <button onclick="goToStep(1)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-1">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-current text-white step-circle" id="sc1">1</span>
+        <span>Informations</span>
+      </button>
+      <div class="text-gray-300 font-bold">›</div>
+      <button onclick="goToStep(2)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-2">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc2">2</span>
+        <span>Surfaces</span>
+      </button>
+      <div class="text-gray-300 font-bold">›</div>
+      <button onclick="goToStep(3)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-3">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc3">3</span>
+        <span>Bâtiments</span>
+      </button>
+      <div class="text-gray-300 font-bold">›</div>
+      <button onclick="goToStep(4)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-4">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc4">4</span>
+        <span>Autres éléments</span>
+      </button>
+      <div class="text-gray-300 font-bold">›</div>
+      <button onclick="goToStep(5)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-5">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc5">5</span>
+        <span>Résultats & Rapport</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main class="max-w-5xl mx-auto px-6 py-8">
+
+<!-- ============ STEP 1: INFORMATIONS GÉNÉRALES ============ -->
+<div id="step-1" class="step-content">
+  <div class="card p-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Informations générales</h2>
+    <p class="text-sm text-gray-500 mb-4">Renseignez les informations sur le mandant et le bien immobilier agricole à évaluer.</p>
+
+    <details class="step-guide bg-green-50 border border-green-200 rounded-lg p-3 mb-6" open>
+      <summary>📋 Guide de l'étape — Informations et mandat</summary>
+      <div class="mt-3 text-gray-600 leading-relaxed space-y-2">
+        <p>Cette étape collecte les informations administratives du rapport officiel. Munissez-vous :</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>De l'identité du mandant (extrait du RC ou AVS si nécessaire)</li>
+          <li>Des numéros de parcelles cadastrales et de l'extrait de la mensuration</li>
+          <li>De la raison précise de l'estimation — elle conditionne la formulation légale du rapport</li>
+        </ul>
+        <p><button type="button" class="help-btn" onclick="showHelp('entreprise_agricole')">?</button> <strong>Entreprise agricole ou simple immeuble ?</strong> La distinction est cruciale — cliquez sur <span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#4a7c40;color:white;font-size:9px;font-weight:bold">?</span> pour en savoir plus.</p>
+      </div>
+    </details>
+
+    <div class="grid grid-cols-2 gap-6">
+      <div class="col-span-2">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4 border-b pb-2">Mandant / Client</h3>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nom du mandant <span class="text-red-500">*</span></label>
+        <input type="text" id="clientName" placeholder="Nom et prénom" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Adresse du mandant</label>
+        <input type="text" id="clientAddress" placeholder="Rue, NPA, Localité" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div class="col-span-2 mt-2">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4 border-b pb-2">Bien immobilier agricole</h3>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Désignation du bien <span class="text-red-500">*</span></label>
+        <input type="text" id="propertyName" placeholder="Ex. Domaine de la Forêt, Les Esserts" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Commune <span class="text-red-500">*</span></label>
+        <input type="text" id="municipality" placeholder="Nom de la commune" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Canton</label>
+        <select id="canton" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <option value="VD">Vaud (VD)</option>
+          <option value="FR">Fribourg (FR)</option>
+          <option value="GE">Genève (GE)</option>
+          <option value="NE">Neuchâtel (NE)</option>
+          <option value="VS">Valais (VS)</option>
+          <option value="JU">Jura (JU)</option>
+          <option value="BE">Berne (BE)</option>
+          <option value="Autre">Autre canton</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">No parcelle(s) cadastrale(s)</label>
+        <input type="text" id="parcelNo" placeholder="Ex. 1234, 1235, 1240" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Surface agricole utile totale (ha)</label>
+        <input type="number" id="totalSAU" placeholder="0.00" step="0.01" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Type d'exploitation</label>
+        <select id="exploitationType" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <option value="polyculture">Polyculture-élevage</option>
+          <option value="lait">Exploitation laitière</option>
+          <option value="grandes_cultures">Grandes cultures</option>
+          <option value="viticulture">Viticulture</option>
+          <option value="maraichage">Maraîchage</option>
+          <option value="arboriculture">Arboriculture</option>
+          <option value="mixte">Mixte / Autre</option>
+        </select>
+      </div>
+
+      <div class="col-span-2 mt-2">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4 border-b pb-2">Estimation</h3>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">N° de dossier</label>
+        <input type="text" id="dossierNo" placeholder="Ex. TAT-2024-001" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Raison de l'estimation <span class="text-red-500">*</span></label>
+        <select id="raisonEstimation" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <option value="remise_famille">Remise de l'exploitation dans la famille</option>
+          <option value="remise_tiers">Remise à un tiers (hors famille)</option>
+          <option value="garantie_hypothecaire">Garantie hypothécaire / Crédit agricole</option>
+          <option value="succession">Succession / Partage successoral</option>
+          <option value="divorce">Divorce / Liquidation du régime matrimonial</option>
+          <option value="donation">Donation</option>
+          <option value="expertise_officielle">Expertise officielle</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Date de la visite sur place</label>
+        <input type="date" id="visitDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Date du rapport</label>
+        <input type="date" id="estimationDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Estimateur / Expert</label>
+        <input type="text" id="estimatorName" placeholder="Nom et prénom" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Accompagné par</label>
+        <input type="text" id="accompaniedBy" placeholder="Nom de la personne accompagnatrice" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Contexte / Mandat</label>
+        <textarea id="generalRemarks" rows="3" placeholder="Contexte du mandat, conditions particulières, objet de la visite..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
+      </div>
+    </div>
+
+    <div class="mt-8 flex justify-end">
+      <button onclick="nextStep(1)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">
+        Suivant → Surfaces agricoles
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 2: SURFACES AGRICOLES ============ -->
+<div id="step-2" class="step-content hidden">
+  <div class="card p-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Surfaces agricoles</h2>
+    <p class="text-sm text-gray-500 mb-3">Saisissez chaque surface ou groupe de surfaces homogènes.</p>
+
+    <details class="step-guide bg-green-50 border border-green-200 rounded-lg p-3 mb-4" open>
+      <summary>🌾 Guide de l'étape — VR Sol (Guide ODFR 01.04.2018)</summary>
+      <div class="mt-3 text-gray-600 leading-relaxed space-y-2">
+        <p><strong>Formule :</strong> <code style="background:#fff;border:1px solid #d1fae5;padding:2px 6px;border-radius:3px">VR = Surface (ha) × VR de base (CHF/ha) × corrections</code></p>
+        <p>Regroupez les surfaces par combinaison homogène de zone / qualité / accessibilité. Chaque correction s'applique multiplicativement :</p>
+        <ul class="list-disc pl-5 space-y-0.5">
+          <li><button type="button" class="help-btn" onclick="showHelp('zone_climatique')">?</button> <strong>Zone climatique</strong> + qualité + accessibilité → valeur de base du tableau</li>
+          <li><button type="button" class="help-btn" onclick="showHelp('declivite')">?</button> <strong>Déclivité</strong> → 0% à –60% selon la pente</li>
+          <li><button type="button" class="help-btn" onclick="showHelp('taille_parcelle')">?</button> <strong>Taille</strong> → 0% à –60% selon la surface</li>
+          <li><button type="button" class="help-btn" onclick="showHelp('distance')">?</button> <strong>Distance</strong> → –10 ou –15%/km au-delà de 3 km</li>
+        </ul>
+        <p class="font-medium" style="color:#92400e">⚠ VR minimale légale : CHF 1 290/ha — le calcul ne peut descendre en dessous (Guide ODFR, ch. 2.1)</p>
+      </div>
+    </details>
+
+    <div id="parcels-container"></div>
+
+    <button onclick="addParcel()" class="mt-4 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Ajouter une surface
+    </button>
+
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+      <div class="flex justify-between items-center">
+        <span class="text-sm font-semibold text-gray-700">Total VR surfaces agricoles :</span>
+        <span class="text-lg font-bold text-green-800" id="total-vr-sol">CHF 0</span>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="prevStep(2)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
+      <button onclick="nextStep(2)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Bâtiments</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 3: BÂTIMENTS ============ -->
+<div id="step-3" class="step-content hidden">
+  <div class="card p-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Bâtiments</h2>
+    <p class="text-sm text-gray-500 mb-3">Évaluez les bâtiments d'habitation et d'exploitation selon le Guide ODFR.</p>
+
+    <details class="step-guide bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
+      <summary>🏠 Guide de l'étape — Bâtiments et logements</summary>
+      <div class="mt-3 text-gray-600 leading-relaxed space-y-2">
+        <p><strong>Principe :</strong> Tous les bâtiments sont évalués par capitalisation :<br>
+        <code style="background:#fff;border:1px solid #d1fae5;padding:2px 6px;border-radius:3px">VR = Valeur locative annuelle ÷ Taux de capitalisation</code></p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li><button type="button" class="help-btn" onclick="showHelp('logement_ce')">?</button> <strong>Logement CE</strong> : taux favorable 4.24% — <button type="button" class="help-btn" onclick="showHelp('ul_calcul')">?</button> comptage UL et points de qualité</li>
+          <li><strong>Autres logements</strong> : loyer marché ÷ taux non agricole (généralement 5–8%)</li>
+          <li><button type="button" class="help-btn" onclick="showHelp('batiment_etat_dur')">?</button> <strong>Bâtiments exploitation</strong> : <button type="button" class="help-btn" onclick="showHelp('batiment_locative')">?</button> valeur locative ÷ taux selon état/DUR (5.3% à 15.2%)</li>
+        </ul>
+        <p class="font-medium" style="color:#2d6a4f">💡 Conseil : La valeur locative des bâtiments agricoles doit être justifiable — notez les surfaces, équipements et état lors de la visite.</p>
+      </div>
+    </details>
+
+    <!-- Logement chef d'exploitation -->
+    <div class="mb-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-green-700 text-white flex items-center justify-center text-xs">A</span>
+        Logement du chef d'exploitation
+        <span class="tooltip ml-1 cursor-help text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+          <span class="tooltiptext">Le logement du chef d'exploitation (max. 14 UL) est évalué à la valeur agricole : CHF 6.40 / point / UL (au-delà de 14 UL : CHF 12.80). Taux capitalisation : 4.24%.</span>
+        </span>
+      </h3>
+
+      <div class="building-card bg-white border border-gray-200 rounded-lg p-5">
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Unités de logement (UL) <button type="button" class="help-btn" onclick="showHelp('ul_calcul')">?</button>
+            </label>
+            <input type="number" id="log-ul" min="1" max="20" value="8" onchange="calcLogement()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <p class="text-xs text-gray-400 mt-1">Max. 14 UL à valeur agricole</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Points de qualité <button type="button" class="help-btn" onclick="showHelp('ul_calcul')">?</button>
+            </label>
+            <input type="number" id="log-points" min="30" max="200" value="90" onchange="calcLogement()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Valeur locative annuelle</label>
+            <div class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 font-semibold text-green-800" id="log-locative">CHF 0</div>
+            <p class="text-xs text-gray-400 mt-1">UL × pts × CHF 6.40</p>
+          </div>
+        </div>
+        <div class="mt-4 p-3 bg-green-50 rounded-lg flex justify-between items-center">
+          <span class="text-sm text-gray-700">VR Logement CE (÷ 4.24%) :</span>
+          <span class="font-bold text-green-800" id="log-vr">CHF 0</span>
+        </div>
+      </div>
+
+      <!-- Autres logements -->
+      <div class="mt-4">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-sm font-semibold text-gray-600">Autres logements (valeur non agricole)</h4>
+          <button onclick="addOtherLogement()" class="btn-secondary px-3 py-1 rounded-lg text-xs font-medium">+ Ajouter</button>
+        </div>
+        <div id="other-logements-container"></div>
+      </div>
+    </div>
+
+    <!-- Bâtiments d'exploitation -->
+    <div class="mb-6">
+      <h3 class="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs">B</span>
+        Bâtiments d'exploitation agricole
+        <span class="tooltip ml-1 cursor-help text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+          <span class="tooltiptext">VR bâtiment = Valeur locative annuelle / Taux capitalisation (selon état et DUR). Taux de base : 4.24% + supplément entretien selon état.</span>
+        </span>
+      </h3>
+
+      <div id="buildings-container"></div>
+
+      <button onclick="addBuilding()" class="mt-3 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter un bâtiment
+      </button>
+    </div>
+
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg space-y-2">
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">VR Logement CE :</span>
+        <span class="font-medium" id="sum-log-ce">CHF 0</span>
+      </div>
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">VR Autres logements :</span>
+        <span class="font-medium" id="sum-log-other">CHF 0</span>
+      </div>
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">VR Bâtiments d'exploitation :</span>
+        <span class="font-medium" id="sum-batiments">CHF 0</span>
+      </div>
+      <div class="flex justify-between items-center border-t pt-2">
+        <span class="font-semibold text-gray-700">Total VR Bâtiments :</span>
+        <span class="font-bold text-green-800" id="total-vr-batiments">CHF 0</span>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="prevStep(3)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
+      <button onclick="nextStep(3)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Autres éléments</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 4: AUTRES ÉLÉMENTS ============ -->
+<div id="step-4" class="step-content hidden">
+  <div class="card p-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Autres éléments</h2>
+    <p class="text-sm text-gray-500 mb-3">Renseignez les forêts et les éléments non agricoles éventuels.</p>
+
+    <details class="step-guide bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
+      <summary>🌲 Guide de l'étape — Forêts et éléments non agricoles</summary>
+      <div class="mt-3 text-gray-600 leading-relaxed space-y-2">
+        <ul class="list-disc pl-5 space-y-1">
+          <li><button type="button" class="help-btn" onclick="showHelp('foret')">?</button> <strong>Forêts</strong> : évaluées selon valeurs indicatives cantonales (CHF/ha). Contactez l'autorité forestière cantonale pour les valeurs officielles actualisées.</li>
+          <li><button type="button" class="help-btn" onclick="showHelp('non_agricole')">?</button> <strong>Éléments non agricoles</strong> (art. 10 al. 3 LDFR) : PV, éolienne, agritourisme… Capitalisés à un taux non agricole propre à leur risque.</li>
+        </ul>
+        <p class="font-medium" style="color:#92400e">⚠ Ces éléments sont inclus dans le VR total mais sans la majoration de 35% pour la <button type="button" class="help-btn" onclick="showHelp('charge_maximale')">?</button> charge maximale (art. 73 LDFR).</p>
+      </div>
+    </details>
+
+    <!-- Forêts -->
+    <div class="mb-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-green-800 text-white flex items-center justify-center text-xs">C</span>
+        Forêts
+      </h3>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-xs text-amber-800">
+        Les forêts faisant partie de l'entreprise agricole sont évaluées selon les valeurs indicatives cantonales. La valeur de rendement forestière est fixée par l'autorité cantonale compétente.
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Surface forêt (ha)</label>
+          <input type="number" id="foret-surface" min="0" step="0.01" value="0" onchange="calcAutres()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">VR indicative (CHF/ha) <button type="button" class="help-btn" onclick="showHelp('foret')">?</button></label>
+          <input type="number" id="foret-vr-ha" min="0" value="2000" onchange="calcAutres()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">VR Forêts</label>
+          <div class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 font-semibold text-green-800" id="foret-vr-total">CHF 0</div>
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Remarques forêt</label>
+        <input type="text" id="foret-remarques" placeholder="Type de peuplement, état, accès..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+
+    <!-- Éléments non agricoles -->
+    <div class="mb-6">
+      <h3 class="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">D</span>
+        Éléments non agricoles
+        <span class="tooltip ml-1 cursor-help text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+          <span class="tooltiptext">Selon art. 10 al. 3 LDFR : installations photovoltaïques, chauffages à distance, éoliennes, agritourisme, etc. Évalués à leur rendement non agricole.</span>
+        </span>
+      </h3>
+
+      <div id="other-elements-container"></div>
+
+      <button onclick="addOtherElement()" class="mt-3 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter un élément non agricole
+      </button>
+    </div>
+
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg space-y-2">
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">VR Forêts :</span>
+        <span class="font-medium" id="sum-foret">CHF 0</span>
+      </div>
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">VR Éléments non agricoles :</span>
+        <span class="font-medium" id="sum-non-agri">CHF 0</span>
+      </div>
+      <div class="flex justify-between items-center border-t pt-2">
+        <span class="font-semibold text-gray-700">Total autres éléments :</span>
+        <span class="font-bold text-green-800" id="total-vr-autres">CHF 0</span>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="prevStep(4)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
+      <button onclick="nextStep(4)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Résultats</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 5: RÉSULTATS & RAPPORT ============ -->
+<div id="step-5" class="step-content hidden">
+
+  <!-- Grand total -->
+  <div class="vr-result p-8 mb-6">
+    <div class="text-center">
+      <div class="text-sm font-medium text-green-100 uppercase tracking-widest mb-2">Valeur de Rendement Agricole Totale</div>
+      <div class="text-5xl font-bold tracking-tight mb-2" id="grand-total-display">CHF 0</div>
+      <div class="text-sm text-green-200">Entreprise agricole complète · Guide ODFR 01.04.2018</div>
+      <div class="mt-4 pt-4 border-t border-green-600/40">
+        <div class="text-xs text-green-200 uppercase tracking-widest mb-1">Charge maximale (art. 73 LDFR) <button type="button" onclick="showHelp('charge_maximale')" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,0.3);color:white;font-size:9px;font-weight:bold;border:none;cursor:pointer;vertical-align:middle;margin-left:3px">?</button></div>
+        <div class="text-2xl font-semibold" id="charge-maximale-display">CHF 0</div>
+        <div class="text-xs text-green-300 mt-1">VR agricole × 1.35 + logements non agr. + éléments non agr.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Détail par composante -->
+  <div class="card p-8 mb-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Récapitulatif par composante</h2>
+
+    <div class="space-y-3" id="breakdown-table">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- Observations importantes -->
+    <div class="mt-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-3">Observations et réserves</h3>
+      <textarea id="observations" rows="4" placeholder="Conditions particulières, éléments à vérifier, réserves sur l'estimation..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
+    </div>
+  </div>
+
+  <!-- Actions rapport -->
+  <div class="card p-8 mb-6 no-print">
+    <h2 class="text-xl font-bold text-gray-800 mb-2">Générer le rapport</h2>
+    <p class="text-sm text-gray-500 mb-6">Le rapport est destiné au client de Terre à Terre. Il présente le détail complet de l'estimation conforme à la LDFR/ODFR.</p>
+
+    <div class="grid grid-cols-2 gap-4">
+      <button onclick="generateReport('print')" class="flex items-center justify-center gap-3 p-5 border-2 border-gray-200 hover:border-green-600 rounded-xl transition-all group">
+        <svg class="w-8 h-8 text-gray-400 group-hover:text-green-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        <div class="text-left">
+          <div class="font-semibold text-gray-700 group-hover:text-green-700">Imprimer / PDF</div>
+          <div class="text-xs text-gray-400">Impression ou export PDF via navigateur</div>
+        </div>
+      </button>
+
+      <button onclick="generateDocx()" class="flex items-center justify-center gap-3 p-5 border-2 border-gray-200 hover:border-blue-600 rounded-xl transition-all group">
+        <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <div class="text-left">
+          <div class="font-semibold text-gray-700 group-hover:text-blue-700">Document Word (.docx)</div>
+          <div class="text-xs text-gray-400">Rapport Word éditable à compléter</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="flex justify-between no-print">
+    <button onclick="prevStep(5)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
+    <button onclick="resetForm()" class="btn-danger px-5 py-2.5 rounded-lg font-medium text-sm">Nouvelle estimation</button>
+  </div>
+</div>
+
+<!-- PRINT REPORT (hidden, shown on print) -->
+<div id="print-report" class="hidden">
+</div>
+
+</main>
+
+<!-- ═══════════ HELP DRAWER ═══════════ -->
+<div class="help-overlay no-print" id="help-overlay" onclick="closeHelp()"></div>
+<div class="help-drawer no-print" id="help-drawer">
+  <div class="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex justify-between items-center" style="z-index:10">
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-widest" style="color:#4a7c40">Guide d'estimation VRA</div>
+      <div class="font-bold text-gray-800 text-sm mt-0.5 leading-tight" id="help-title">Aide</div>
+    </div>
+    <button onclick="closeHelp()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 text-xl font-bold" title="Fermer">&times;</button>
+  </div>
+  <div class="p-5">
+    <div class="text-xs border rounded px-3 py-2 mb-4 font-medium" style="background:#f0f7f4;color:#2d6a4f;border-color:#74c69d" id="help-loi"></div>
+    <div class="text-sm text-gray-700 leading-relaxed" id="help-text"></div>
+    <div class="mt-5 pt-4 border-t border-amber-100" id="help-visite-section">
+      <h4 class="text-xs font-bold uppercase tracking-wide mb-3 flex items-center gap-2" style="color:#92400e">
+        <span>🏡</span> À observer lors de la visite sur place
+      </h4>
+      <div class="text-sm text-gray-700 leading-relaxed" id="help-visite"></div>
+    </div>
+    <div class="mt-6 pt-4 border-t border-gray-100 text-center">
+      <button onclick="closeHelp()" class="btn-secondary px-4 py-2 rounded-lg text-xs font-medium">Fermer l'aide</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating help button -->
+<button onclick="showHelp('guide_general')"
+  class="no-print fixed bottom-6 right-6 w-12 h-12 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-white font-bold text-lg"
+  style="background:#2d6a4f;z-index:50"
+  title="Guide d'estimation — aide légale complète">?</button>
+
+<footer class="no-print mt-12 border-t border-gray-200 bg-white">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center text-xs text-gray-400">
+    <span>Terre à Terre – Fiduciaire agricole, Suisse romande</span>
+    <span>Base légale : LDFR art. 10 · ODFR · Guide d'estimation 01.04.2018 · Période de calcul 2009–2024 · Taux capitalisation 4.24%</span>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// DATA TABLES (Source: Guide ODFR 01.04.2018)
+// ============================================================
+
+const VR_TABLE = {
+  'A1A2B1B2': {
+    'bonne':   [7730, 6570, 5410, 4640],
+    'moyenne': [5910, 5020, 4140, 3540],
+    'mauvaise':[4120, 3500, 2880, 2470]
+  },
+  'A3B3A6': {
+    'bonne':   [7470, 6350, 5230, 4480],
+    'moyenne': [5720, 4860, 4010, 3430],
+    'mauvaise':[4050, 3440, 2830, 2430]
+  },
+  'A4A5B4B5': {
+    'bonne':   [7100, 6030, 4970, 4260],
+    'moyenne': [5500, 4670, 3850, 3300],
+    'mauvaise':[3970, 3380, 2780, 2380]
+  },
+  'B6': {
+    'bonne':   [6620, 5620, 4630, 3970],
+    'moyenne': [5270, 4480, 3690, 3160],
+    'mauvaise':[4010, 3410, 2810, 2410]
+  },
+  'C1-4': {
+    'bonne':   [6430, 5460, 4500, 3860],
+    'moyenne': [5010, 4260, 3510, 3010],
+    'mauvaise':[3670, 3120, 2570, 2200]
+  },
+  'C5-6': {
+    'bonne':   [5650, 4800, 3950, 3390],
+    'moyenne': [4420, 3760, 3090, 2650],
+    'mauvaise':[3230, 2740, 2260, 1940]
+  },
+  'D1-6': {
+    'bonne':   [5010, 4260, 3510, 3010],
+    'moyenne': [3750, 3190, 2620, 2250],
+    'mauvaise':[2520, 2140, 1760, 1510]
+  },
+  'F': {
+    'bonne':   [3820, 3250, 2680, 2290],
+    'moyenne': [3080, 2620, 2150, 1850],
+    'mauvaise':[2300, 1950, 1610, 1380]
+  },
+  'G': {
+    'bonne':   [3150, 2680, 2210, 1890],
+    'moyenne': [2630, 2240, 1840, 1580],
+    'mauvaise':[2150, 1820, 1500, 1290]
+  }
+};
+const ACCESS_IDX = {4: 0, 3: 1, 2: 2, 1: 3};
+const VR_MIN = 1290; // CHF/ha minimum
+
+// Building cap rates by condition (base 4.24% + maintenance supplement)
+const BLDG_CAP_RATES = {
+  'neuf':      {rate: 0.053, label: 'Neuf / Très bon (DUR ≥ 70 ans)'},
+  'bon':       {rate: 0.065, label: 'Bon état (DUR ~50 ans)'},
+  'moyen':     {rate: 0.085, label: 'État moyen (DUR ~30 ans)'},
+  'mauvais':   {rate: 0.110, label: 'Mauvais état (DUR ~20 ans)'},
+  'tresMauvais':{rate: 0.152, label: 'Très mauvais / Vieux (DUR ≤ 15 ans)'}
+};
+
+const LOG_CE_RATE = 6.40;   // CHF/point/UL (max 14 UL)
+const LOG_CE_RATE2 = 12.80; // CHF/point/UL (>14 UL)
+const CAP_RATE_LOG = 0.0424;
+
+// ============================================================
+// STATE
+// ============================================================
+let currentStep = 1;
+let parcels = [];
+let buildings = [];
+let otherLogements = [];
+let otherElements = [];
+let parcelCounter = 0;
+let buildingCounter = 0;
+let logementCounter = 0;
+let elementCounter = 0;
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function updateStepUI() {
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById(`step-btn-${i}`);
+    const circle = document.getElementById(`sc${i}`);
+    const content = document.getElementById(`step-${i}`);
+
+    if (i < currentStep) {
+      btn.style.backgroundColor = '#74c69d';
+      btn.style.color = 'white';
+      circle.textContent = '✓';
+    } else if (i === currentStep) {
+      btn.style.backgroundColor = '#2d6a4f';
+      btn.style.color = 'white';
+      circle.textContent = i;
+    } else {
+      btn.style.backgroundColor = '#e9ecef';
+      btn.style.color = '#6c757d';
+      circle.textContent = i;
+    }
+
+    if (content) {
+      content.classList.toggle('hidden', i !== currentStep);
+    }
+  }
+
+  if (currentStep === 5) updateResults();
+}
+
+function goToStep(n) { currentStep = n; updateStepUI(); window.scrollTo(0,0); }
+function nextStep(from) { if (from < 5) goToStep(from + 1); }
+function prevStep(from) { if (from > 1) goToStep(from - 1); }
+
+// ============================================================
+// FORMATTING
+// ============================================================
+function fmtCHF(n) {
+  if (!n || isNaN(n)) return 'CHF 0';
+  return 'CHF ' + Math.round(n).toLocaleString('fr-CH');
+}
+
+// ============================================================
+// STEP 2: PARCELS
+// ============================================================
+function addParcel() {
+  const id = ++parcelCounter;
+  const p = {id, surface: 0, type: 'terres_arables', zone: 'A1A2B1B2', qualite: 'bonne', accessibilite: 4,
+             declivite: '0-18', taille: '>1.5', distKm: 0, vr: 0, description: ''};
+  parcels.push(p);
+  renderParcels();
+}
+
+function removeParcel(id) {
+  parcels = parcels.filter(p => p.id !== id);
+  renderParcels();
+  calcAllSol();
+}
+
+function renderParcels() {
+  const container = document.getElementById('parcels-container');
+  if (parcels.length === 0) {
+    container.innerHTML = `<div class="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+      <p class="text-sm">Aucune surface ajoutée. Cliquez sur "Ajouter une surface" ci-dessous.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = parcels.map((p, idx) => `
+    <div class="parcel-card bg-white border border-gray-200 rounded-lg p-5 mb-4" id="parcel-card-${p.id}">
+      <div class="flex justify-between items-start mb-4">
+        <h4 class="font-semibold text-gray-700">Surface ${idx + 1}${p.description ? ' – ' + p.description : ''}</h4>
+        <button onclick="removeParcel(${p.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+      </div>
+      <div class="grid grid-cols-3 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description (optionnel)</label>
+          <input type="text" value="${p.description}" placeholder="Ex. Prairie du bas" onchange="updateParcel(${p.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Type de surface</label>
+          <select onchange="updateParcel(${p.id},'type',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="terres_arables" ${p.type==='terres_arables'?'selected':''}>Terres arables</option>
+            <option value="prairies_fauche" ${p.type==='prairies_fauche'?'selected':''}>Prairies de fauche</option>
+            <option value="prairies_permanentes" ${p.type==='prairies_permanentes'?'selected':''}>Prairies permanentes</option>
+            <option value="paturages" ${p.type==='paturages'?'selected':''}>Pâturages</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Surface (ha)</label>
+          <input type="number" value="${p.surface}" min="0" step="0.01" onchange="updateParcel(${p.id},'surface',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Zone climatique <button type="button" class="help-btn" onclick="showHelp('zone_climatique')">?</button></label>
+          <select onchange="updateParcel(${p.id},'zone',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="A1A2B1B2" ${p.zone==='A1A2B1B2'?'selected':''}>A1/A2/B1/B2 – Plateau bas</option>
+            <option value="A3B3A6" ${p.zone==='A3B3A6'?'selected':''}>A3/B3/A6 – Collines</option>
+            <option value="A4A5B4B5" ${p.zone==='A4A5B4B5'?'selected':''}>A4/A5/B4/B5 – Pré-Alpes</option>
+            <option value="B6" ${p.zone==='B6'?'selected':''}>B6 – Collines de montagne</option>
+            <option value="C1-4" ${p.zone==='C1-4'?'selected':''}>C1–4 – Alpes basses</option>
+            <option value="C5-6" ${p.zone==='C5-6'?'selected':''}>C5–6 – Alpes moyennes</option>
+            <option value="D1-6" ${p.zone==='D1-6'?'selected':''}>D1–6 / E1–6 – Alpes hautes</option>
+            <option value="F" ${p.zone==='F'?'selected':''}>F – Alpes très hautes</option>
+            <option value="G" ${p.zone==='G'?'selected':''}>G – Limite des cultures</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Qualité du sol <button type="button" class="help-btn" onclick="showHelp('qualite_sol')">?</button></label>
+          <select onchange="updateParcel(${p.id},'qualite',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="bonne" ${p.qualite==='bonne'?'selected':''}>Bonne</option>
+            <option value="moyenne" ${p.qualite==='moyenne'?'selected':''}>Moyenne</option>
+            <option value="mauvaise" ${p.qualite==='mauvaise'?'selected':''}>Mauvaise</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Accessibilité <button type="button" class="help-btn" onclick="showHelp('accessibilite')">?</button></label>
+          <select onchange="updateParcel(${p.id},'accessibilite',parseInt(this.value))" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="4" ${p.accessibilite==4?'selected':''}>4 – Route carrossable (camions)</option>
+            <option value="3" ${p.accessibilite==3?'selected':''}>3 – Chemin carrossable (tracteurs)</option>
+            <option value="2" ${p.accessibilite==2?'selected':''}>2 – Téléphérique</option>
+            <option value="1" ${p.accessibilite==1?'selected':''}>1 – Sentier / muletier</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Déclivité <button type="button" class="help-btn" onclick="showHelp('declivite')">?</button></label>
+          <select onchange="updateParcel(${p.id},'declivite',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="0-18" ${p.declivite==='0-18'?'selected':''}>0–18% (0%)</option>
+            <option value="19-35" ${p.declivite==='19-35'?'selected':''}>19–35% (–20%)</option>
+            <option value="36-50" ${p.declivite==='36-50'?'selected':''}>36–50% (–40%)</option>
+            <option value=">50" ${p.declivite==='>50'?'selected':''}>›50% (–60%)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Taille de parcelle <button type="button" class="help-btn" onclick="showHelp('taille_parcelle')">?</button></label>
+          <select onchange="updateParcel(${p.id},'taille',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value=">1.5" ${p.taille==='>1.5'?'selected':''}>›1.5 ha (0%)</option>
+            <option value="0.5-1.5" ${p.taille==='0.5-1.5'?'selected':''}>0.5–1.5 ha (–20%)</option>
+            <option value="<0.5" ${p.taille==='<0.5'?'selected':''}>‹0.5 ha (–60%)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Distance bâtiments (km) <button type="button" class="help-btn" onclick="showHelp('distance')">?</button></label>
+          <input type="number" value="${p.distKm}" min="0" step="0.5" onchange="updateParcel(${p.id},'distKm',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-3 p-2 bg-green-50 rounded flex justify-between items-center">
+        <span class="text-xs text-gray-600">VR de base : <strong id="vr-base-${p.id}">–</strong> CHF/ha · Corrections : <strong id="vr-corr-${p.id}">–</strong></span>
+        <span class="text-sm font-bold text-green-800">VR : <span id="vr-parcel-${p.id}">CHF 0</span></span>
+      </div>
+    </div>
+  `).join('');
+
+  calcAllSol();
+}
+
+function updateParcel(id, field, value) {
+  const p = parcels.find(x => x.id === id);
+  if (p) { p[field] = value; calcAllSol(); }
+}
+
+function calcParcelVR(p) {
+  const tbl = VR_TABLE[p.zone];
+  if (!tbl) return 0;
+  const qualData = tbl[p.qualite];
+  if (!qualData) return 0;
+  const idx = ACCESS_IDX[p.accessibilite] ?? 0;
+  const vrBase = qualData[idx];
+
+  // Corrections
+  const slopeCorr = {
+    '0-18': 0, '19-35': -0.20, '36-50': -0.40, '>50': -0.60
+  }[p.declivite] ?? 0;
+
+  const sizeCorr = {
+    '>1.5': 0, '0.5-1.5': -0.20, '<0.5': -0.60
+  }[p.taille] ?? 0;
+
+  // Distance correction (beyond 3 km)
+  let distCorr = 0;
+  if (p.distKm > 3) {
+    const extra = p.distKm - 3;
+    const ratePerKm = (p.type === 'terres_arables') ? 0.10 : 0.15;
+    distCorr = -Math.min(extra * ratePerKm, 0.50); // cap at -50%
+  }
+
+  const totalCorr = slopeCorr + sizeCorr + distCorr;
+  const vrPerHa = Math.max(vrBase * (1 + totalCorr), VR_MIN);
+
+  // Update UI elements
+  const baseEl = document.getElementById(`vr-base-${p.id}`);
+  const corrEl = document.getElementById(`vr-corr-${p.id}`);
+  if (baseEl) baseEl.textContent = vrBase.toLocaleString('fr-CH');
+  if (corrEl) {
+    const pct = Math.round(totalCorr * 100);
+    corrEl.textContent = pct === 0 ? '0%' : (pct > 0 ? '+' + pct + '%' : pct + '%');
+  }
+
+  return p.surface * vrPerHa;
+}
+
+function calcAllSol() {
+  let total = 0;
+  parcels.forEach(p => {
+    p.vr = calcParcelVR(p);
+    const el = document.getElementById(`vr-parcel-${p.id}`);
+    if (el) el.textContent = fmtCHF(p.vr);
+    total += p.vr;
+  });
+  document.getElementById('total-vr-sol').textContent = fmtCHF(total);
+}
+
+// ============================================================
+// STEP 3: BUILDINGS
+// ============================================================
+function calcLogement() {
+  const ul = Math.min(parseFloat(document.getElementById('log-ul').value) || 0, 14);
+  const ulExtra = Math.max((parseFloat(document.getElementById('log-ul').value) || 0) - 14, 0);
+  const pts = parseFloat(document.getElementById('log-points').value) || 0;
+
+  const locative = ul * pts * LOG_CE_RATE + ulExtra * pts * LOG_CE_RATE2;
+  const vr = locative / CAP_RATE_LOG;
+
+  document.getElementById('log-locative').textContent = fmtCHF(locative);
+  document.getElementById('log-vr').textContent = fmtCHF(vr);
+  updateBuildingTotals();
+}
+
+function addOtherLogement() {
+  const id = ++logementCounter;
+  otherLogements.push({id, description: '', locative: 0, capRate: 0.065, vr: 0});
+  renderOtherLogements();
+}
+
+function removeOtherLogement(id) {
+  otherLogements = otherLogements.filter(x => x.id !== id);
+  renderOtherLogements();
+  updateBuildingTotals();
+}
+
+function renderOtherLogements() {
+  const c = document.getElementById('other-logements-container');
+  c.innerHTML = otherLogements.map(l => `
+    <div class="border border-gray-200 rounded-lg p-4 mb-3 bg-gray-50">
+      <div class="grid grid-cols-4 gap-3 items-end">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+          <input type="text" value="${l.description}" placeholder="Ex. Logement parents, appartement locataire"
+            onchange="updateOtherLog(${l.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Loyer annuel marché (CHF)</label>
+          <input type="number" value="${l.locative}" min="0" step="100"
+            onchange="updateOtherLog(${l.id},'locative',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Taux capi. (%)</label>
+          <input type="number" value="${(l.capRate*100).toFixed(1)}" min="3" max="15" step="0.1"
+            onchange="updateOtherLog(${l.id},'capRate',parseFloat(this.value)/100)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-2 flex justify-between items-center">
+        <button onclick="removeOtherLogement(${l.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+        <span class="text-sm font-bold text-green-800">VR : ${fmtCHF(l.vr)}</span>
+      </div>
+    </div>
+  `).join('') || '<p class="text-xs text-gray-400 italic">Aucun autre logement.</p>';
+}
+
+function updateOtherLog(id, field, value) {
+  const l = otherLogements.find(x => x.id === id);
+  if (l) {
+    l[field] = value;
+    l.vr = l.locative / l.capRate;
+    renderOtherLogements();
+    updateBuildingTotals();
+  }
+}
+
+function addBuilding() {
+  const id = ++buildingCounter;
+  buildings.push({id, description: '', type: 'etable', locative: 0, etat: 'moyen', vr: 0});
+  renderBuildings();
+}
+
+function removeBuilding(id) {
+  buildings = buildings.filter(x => x.id !== id);
+  renderBuildings();
+  updateBuildingTotals();
+}
+
+function renderBuildings() {
+  const c = document.getElementById('buildings-container');
+  if (buildings.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucun bâtiment d\'exploitation ajouté.</p>';
+    return;
+  }
+  c.innerHTML = buildings.map(b => `
+    <div class="building-card bg-white border border-gray-200 rounded-lg p-4 mb-3">
+      <div class="grid grid-cols-4 gap-3 items-end">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description du bâtiment</label>
+          <input type="text" value="${b.description}" placeholder="Ex. Étable bovins, Grange à fourrage, Hangar machines"
+            onchange="updateBuilding(${b.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Valeur locative annuelle (CHF) <button type="button" class="help-btn" onclick="showHelp('batiment_locative')">?</button></label>
+          <input type="number" value="${b.locative}" min="0" step="100"
+            onchange="updateBuilding(${b.id},'locative',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">État / DUR <button type="button" class="help-btn" onclick="showHelp('batiment_etat_dur')">?</button></label>
+          <select onchange="updateBuilding(${b.id},'etat',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            ${Object.entries(BLDG_CAP_RATES).map(([k,v]) =>
+              `<option value="${k}" ${b.etat===k?'selected':''}>${v.label} (${(v.rate*100).toFixed(1)}%)</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="mt-2 flex justify-between items-center">
+        <button onclick="removeBuilding(${b.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+        <span class="text-xs text-gray-500">Taux : ${(BLDG_CAP_RATES[b.etat].rate*100).toFixed(1)}%</span>
+        <span class="text-sm font-bold text-green-800">VR : ${fmtCHF(b.vr)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateBuilding(id, field, value) {
+  const b = buildings.find(x => x.id === id);
+  if (b) {
+    b[field] = value;
+    b.vr = b.locative / BLDG_CAP_RATES[b.etat].rate;
+    renderBuildings();
+    updateBuildingTotals();
+  }
+}
+
+function getLogCEVR() {
+  const ul = Math.min(parseFloat(document.getElementById('log-ul').value) || 0, 14);
+  const ulExtra = Math.max((parseFloat(document.getElementById('log-ul').value) || 0) - 14, 0);
+  const pts = parseFloat(document.getElementById('log-points').value) || 0;
+  const locative = ul * pts * LOG_CE_RATE + ulExtra * pts * LOG_CE_RATE2;
+  return locative / CAP_RATE_LOG;
+}
+
+function updateBuildingTotals() {
+  const logCE = getLogCEVR();
+  const logOther = otherLogements.reduce((s,l) => s + l.vr, 0);
+  const batiments = buildings.reduce((s,b) => s + b.vr, 0);
+  const total = logCE + logOther + batiments;
+
+  document.getElementById('sum-log-ce').textContent = fmtCHF(logCE);
+  document.getElementById('sum-log-other').textContent = fmtCHF(logOther);
+  document.getElementById('sum-batiments').textContent = fmtCHF(batiments);
+  document.getElementById('total-vr-batiments').textContent = fmtCHF(total);
+}
+
+// ============================================================
+// STEP 4: AUTRES ÉLÉMENTS
+// ============================================================
+function calcAutres() {
+  const surface = parseFloat(document.getElementById('foret-surface').value) || 0;
+  const vrHa = parseFloat(document.getElementById('foret-vr-ha').value) || 0;
+  const foretTotal = surface * vrHa;
+  document.getElementById('foret-vr-total').textContent = fmtCHF(foretTotal);
+
+  const nonAgri = otherElements.reduce((s,e) => s + e.vr, 0);
+  const total = foretTotal + nonAgri;
+
+  document.getElementById('sum-foret').textContent = fmtCHF(foretTotal);
+  document.getElementById('sum-non-agri').textContent = fmtCHF(nonAgri);
+  document.getElementById('total-vr-autres').textContent = fmtCHF(total);
+}
+
+function addOtherElement() {
+  const id = ++elementCounter;
+  otherElements.push({id, description: '', locative: 0, capRate: 0.065, vr: 0});
+  renderOtherElements();
+}
+
+function removeOtherElement(id) {
+  otherElements = otherElements.filter(x => x.id !== id);
+  renderOtherElements();
+  calcAutres();
+}
+
+function renderOtherElements() {
+  const c = document.getElementById('other-elements-container');
+  c.innerHTML = otherElements.map(e => `
+    <div class="border border-blue-100 bg-blue-50 rounded-lg p-4 mb-3">
+      <div class="grid grid-cols-4 gap-3 items-end">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+          <input type="text" value="${e.description}" placeholder="Ex. Installation photovoltaïque, Buvette agritouristique"
+            onchange="updateOtherEl(${e.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Rendement annuel (CHF)</label>
+          <input type="number" value="${e.locative}" min="0" step="100"
+            onchange="updateOtherEl(${e.id},'locative',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Taux capi. (%)</label>
+          <input type="number" value="${(e.capRate*100).toFixed(1)}" min="3" max="20" step="0.1"
+            onchange="updateOtherEl(${e.id},'capRate',parseFloat(this.value)/100)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-2 flex justify-between items-center">
+        <button onclick="removeOtherElement(${e.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+        <span class="text-sm font-bold text-blue-800">VR : ${fmtCHF(e.vr)}</span>
+      </div>
+    </div>
+  `).join('') || '<p class="text-xs text-gray-400 italic py-2">Aucun élément non agricole.</p>';
+}
+
+function updateOtherEl(id, field, value) {
+  const e = otherElements.find(x => x.id === id);
+  if (e) {
+    e[field] = value;
+    e.vr = e.locative / e.capRate;
+    renderOtherElements();
+    calcAutres();
+  }
+}
+
+// ============================================================
+// STEP 5: RESULTS
+// ============================================================
+function getGrandTotal() {
+  const vrSol = parcels.reduce((s,p) => s + p.vr, 0);
+  const logCE = getLogCEVR();
+  const logOther = otherLogements.reduce((s,l) => s + l.vr, 0);
+  const batiments = buildings.reduce((s,b) => s + b.vr, 0);
+  const foret = (parseFloat(document.getElementById('foret-surface')?.value) || 0) *
+                (parseFloat(document.getElementById('foret-vr-ha')?.value) || 0);
+  const nonAgri = otherElements.reduce((s,e) => s + e.vr, 0);
+  const total = vrSol + logCE + logOther + batiments + foret + nonAgri;
+
+  // Charge maximale (art. 73 LDFR) :
+  // La base agricole (hors autres logements et éléments non agricoles) est augmentée de 35%.
+  // Les autres logements et éléments non agricoles sont ajoutés au résultat sans majoration.
+  const vrPurementAgricole = total - logOther - nonAgri;
+  const chargeMaximale = Math.round(vrPurementAgricole * 1.35 + logOther + nonAgri);
+
+  return {vrSol, logCE, logOther, batiments, foret, nonAgri, total, chargeMaximale,
+    vrPurementAgricole};
+}
+
+function updateResults() {
+  const r = getGrandTotal();
+  document.getElementById('grand-total-display').textContent = fmtCHF(r.total);
+  document.getElementById('charge-maximale-display').textContent = fmtCHF(r.chargeMaximale);
+
+  const rows = [
+    {label: 'Surfaces agricoles (sol)', value: r.vrSol, detail: `${parcels.length} surface(s)`},
+    {label: 'Logement chef d\'exploitation', value: r.logCE, detail: `${document.getElementById('log-ul')?.value||0} UL × ${document.getElementById('log-points')?.value||0} pts`},
+    {label: 'Autres logements', value: r.logOther, detail: `${otherLogements.length} logement(s) — valeur non agricole`},
+    {label: 'Bâtiments d\'exploitation', value: r.batiments, detail: `${buildings.length} bâtiment(s)`},
+    {label: 'Forêts', value: r.foret, detail: `${document.getElementById('foret-surface')?.value||0} ha`},
+    {label: 'Éléments non agricoles', value: r.nonAgri, detail: `${otherElements.length} élément(s) — art. 10 al. 3 LDFR`},
+  ].filter(row => row.value > 0);
+
+  const totalPct = r.total > 0 ? (v) => Math.round(v/r.total*100) : () => 0;
+
+  document.getElementById('breakdown-table').innerHTML = rows.map(row => `
+    <div class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
+      <div class="flex-1">
+        <div class="text-sm font-medium text-gray-700">${row.label}</div>
+        <div class="text-xs text-gray-400">${row.detail}</div>
+      </div>
+      <div class="w-32 bg-gray-100 rounded-full h-2">
+        <div class="bg-green-600 h-2 rounded-full" style="width:${totalPct(row.value)}%"></div>
+      </div>
+      <div class="w-8 text-xs text-gray-400 text-right">${totalPct(row.value)}%</div>
+      <div class="w-32 text-right font-semibold text-gray-800">${fmtCHF(row.value)}</div>
+    </div>
+  `).join('') + `
+    <div class="flex items-center gap-4 py-4 mt-2 border-t-2 border-green-600">
+      <div class="flex-1 font-bold text-gray-800">TOTAL VR ENTREPRISE AGRICOLE</div>
+      <div class="w-32"></div><div class="w-8"></div>
+      <div class="w-32 text-right font-bold text-green-800 text-lg">${fmtCHF(r.total)}</div>
+    </div>
+    <div class="flex items-center gap-4 py-3 mt-1 bg-amber-50 rounded-lg px-3">
+      <div class="flex-1">
+        <div class="text-sm font-semibold text-amber-900">Charge maximale (art. 73 LDFR)</div>
+        <div class="text-xs text-amber-700">VR agricole (${fmtCHF(r.vrPurementAgricole)}) × 1.35${r.logOther > 0 ? ' + autres logements' : ''}${r.nonAgri > 0 ? ' + éléments non agr.' : ''}</div>
+      </div>
+      <div class="w-32 text-right font-bold text-amber-900 text-lg">${fmtCHF(r.chargeMaximale)}</div>
+    </div>
+  `;
+}
+
+// ============================================================
+// REPORT GENERATION
+// ============================================================
+function getFormData() {
+  const raisonEl = document.getElementById('raisonEstimation');
+  return {
+    clientName: document.getElementById('clientName')?.value || '',
+    clientAddress: document.getElementById('clientAddress')?.value || '',
+    propertyName: document.getElementById('propertyName')?.value || '',
+    municipality: document.getElementById('municipality')?.value || '',
+    canton: document.getElementById('canton')?.value || '',
+    parcelNo: document.getElementById('parcelNo')?.value || '',
+    totalSAU: document.getElementById('totalSAU')?.value || '',
+    exploitationType: document.getElementById('exploitationType')?.options[document.getElementById('exploitationType')?.selectedIndex]?.text || '',
+    estimationDate: document.getElementById('estimationDate')?.value || '',
+    visitDate: document.getElementById('visitDate')?.value || '',
+    estimatorName: document.getElementById('estimatorName')?.value || '',
+    accompaniedBy: document.getElementById('accompaniedBy')?.value || '',
+    dossierNo: document.getElementById('dossierNo')?.value || '',
+    raisonEstimation: raisonEl?.options[raisonEl?.selectedIndex]?.text || '',
+    generalRemarks: document.getElementById('generalRemarks')?.value || '',
+    observations: document.getElementById('observations')?.value || '',
+    foretSurface: document.getElementById('foret-surface')?.value || '0',
+    foretVrHa: document.getElementById('foret-vr-ha')?.value || '0',
+    foretRemarques: document.getElementById('foret-remarques')?.value || '',
+    logUL: document.getElementById('log-ul')?.value || '0',
+    logPoints: document.getElementById('log-points')?.value || '0',
+  };
+}
+
+function generateReport(type) {
+  const data = getFormData();
+  const r = getGrandTotal();
+  const date = data.estimationDate ? new Date(data.estimationDate).toLocaleDateString('fr-CH', {day:'2-digit',month:'2-digit',year:'numeric'}) : new Date().toLocaleDateString('fr-CH');
+  const visitDateFmt = data.visitDate ? new Date(data.visitDate).toLocaleDateString('fr-CH', {day:'2-digit',month:'2-digit',year:'numeric'}) : '–';
+
+  const reportHtml = `
+    <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+    <title>Rapport VRA – ${data.propertyName || 'Estimation'}${data.dossierNo ? ' · ' + data.dossierNo : ''}</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #1a1a1a; font-size: 11pt; }
+      .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #4a7c40; }
+      h1 { color: #2d6a4f; font-size: 18pt; margin: 20px 0 5px; }
+      h2 { color: #2d6a4f; font-size: 12pt; border-bottom: 1.5px solid #74c69d; padding-bottom: 4px; margin-top: 24px; }
+      h3 { font-size: 10pt; color: #555; margin: 12px 0 6px; }
+      table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 8px 0; }
+      th { background: #f0f7f4; text-align: left; padding: 7px 8px; font-weight: 600; color: #2d6a4f; }
+      td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+      tr:last-child td { border-bottom: none; }
+      .total-row { background: #f0f7f4; font-weight: bold; }
+      .grand-total { background: #2d6a4f; color: white; font-weight: bold; font-size: 12pt; }
+      .grand-total td { padding: 10px 8px; }
+      .cm-row { background: #fff8e1; font-weight: bold; font-size: 11pt; }
+      .cm-row td { padding: 9px 8px; color: #92400e; border-top: 2px solid #f59e0b; }
+      .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .info-item { background: #f9f9f9; padding: 8px 10px; border-radius: 4px; }
+      .info-item .label { font-size: 9pt; color: #888; }
+      .info-item .value { font-size: 10pt; font-weight: 600; }
+      .bases-legales { font-size: 10pt; color: #333; line-height: 1.6; margin: 0; }
+      .bases-legales p { margin: 0 0 8px; }
+      .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 9pt; color: #888; }
+      .disclaimer { background: #f0f7f4; border: 1px solid #74c69d; padding: 10px 14px; border-radius: 4px; font-size: 9pt; margin: 20px 0; color: #1a4731; }
+      .signature-box { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+      .sig-field { border-top: 1px solid #333; padding-top: 6px; font-size: 10pt; }
+      .cm-box { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 6px; padding: 12px 16px; margin: 16px 0; }
+      @media print { body { padding: 20px; } .no-print { display: none !important; } }
+    </style></head><body>
+
+    <div class="header">
+      <div>
+        <svg width="210" height="62" viewBox="0 0 210 62" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="31" cy="31" r="28" fill="none" stroke="#4a7c40" stroke-width="2.5"/>
+          <line x1="31" y1="52" x2="31" y2="12" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round"/>
+          <ellipse cx="31" cy="13" rx="3" ry="5" fill="#4a7c40"/>
+          <path d="M31 20 Q24 17 20 13" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M31 20 Q38 17 42 13" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <ellipse cx="20" cy="13" rx="4" ry="2.2" transform="rotate(-35 20 13)" fill="#4a7c40"/>
+          <ellipse cx="42" cy="13" rx="4" ry="2.2" transform="rotate(35 42 13)" fill="#4a7c40"/>
+          <path d="M31 27 Q23 24 18 20" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M31 27 Q39 24 44 20" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <ellipse cx="18" cy="20" rx="4" ry="2.2" transform="rotate(-35 18 20)" fill="#4a7c40"/>
+          <ellipse cx="44" cy="20" rx="4" ry="2.2" transform="rotate(35 44 20)" fill="#4a7c40"/>
+          <path d="M31 35 Q23 32 18 28" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M31 35 Q39 32 44 28" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <ellipse cx="18" cy="28" rx="4" ry="2.2" transform="rotate(-35 18 28)" fill="#4a7c40"/>
+          <ellipse cx="44" cy="28" rx="4" ry="2.2" transform="rotate(35 44 28)" fill="#4a7c40"/>
+          <path d="M31 43 Q24 40 19 36" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M31 43 Q38 40 43 36" stroke="#4a7c40" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <ellipse cx="19" cy="36" rx="4" ry="2.2" transform="rotate(-35 19 36)" fill="#4a7c40"/>
+          <ellipse cx="43" cy="36" rx="4" ry="2.2" transform="rotate(35 43 36)" fill="#4a7c40"/>
+          <text x="72" y="28" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#4a7c40" letter-spacing="3">TERRE À TERRE</text>
+          <text x="72" y="44" font-family="Arial, sans-serif" font-size="9" fill="#7a9e70" letter-spacing="1">Fiduciaire agricole – Suisse romande</text>
+        </svg>
+      </div>
+      <div style="text-align:right;font-size:10pt;color:#444;">
+        ${data.dossierNo ? `<strong style="font-size:12pt;color:#2d6a4f;">${data.dossierNo}</strong><br>` : ''}
+        <strong>RAPPORT D'ESTIMATION</strong><br>
+        Valeur de Rendement Agricole<br>
+        ${data.clientAddress ? `<span style="color:#888;">${data.clientAddress}</span><br>` : ''}
+        <span style="color:#2d6a4f;">Date : ${date}</span>
+      </div>
+    </div>
+
+    <h1>Estimation de la Valeur de Rendement Agricole</h1>
+    <p style="color:#555;font-size:10pt;margin:0 0 4px;">Biens-fonds ${data.propertyName ? `de ${data.propertyName}` : ''} situés sur le territoire de <strong>${data.municipality || '–'} (${data.canton})</strong></p>
+    ${data.raisonEstimation ? `<p style="color:#2d6a4f;font-size:10pt;margin:0 0 16px;"><em>Raison : ${data.raisonEstimation}</em></p>` : ''}
+
+    <h2>1. Mandat et procédure</h2>
+    <div class="info-grid" style="margin-bottom:10px;">
+      <div class="info-item"><div class="label">Mandant</div><div class="value">${data.clientName || '–'}</div></div>
+      <div class="info-item"><div class="label">Adresse</div><div class="value">${data.clientAddress || '–'}</div></div>
+      <div class="info-item"><div class="label">N° de dossier</div><div class="value">${data.dossierNo || '–'}</div></div>
+      <div class="info-item"><div class="label">Raison de l'estimation</div><div class="value">${data.raisonEstimation || '–'}</div></div>
+      <div class="info-item"><div class="label">Date de la visite sur place</div><div class="value">${visitDateFmt}</div></div>
+      <div class="info-item"><div class="label">Accompagné par</div><div class="value">${data.accompaniedBy || '–'}</div></div>
+      <div class="info-item"><div class="label">Estimateur</div><div class="value">${data.estimatorName || '–'}</div></div>
+      <div class="info-item"><div class="label">Date du rapport</div><div class="value">${date}</div></div>
+      <div class="info-item"><div class="label">Bien immobilier</div><div class="value">${data.propertyName || '–'}</div></div>
+      <div class="info-item"><div class="label">Commune / Canton</div><div class="value">${data.municipality || '–'} (${data.canton})</div></div>
+      <div class="info-item"><div class="label">N° parcelle(s)</div><div class="value">${data.parcelNo || '–'}</div></div>
+      <div class="info-item"><div class="label">Type d'exploitation</div><div class="value">${data.exploitationType || '–'}</div></div>
+      <div class="info-item"><div class="label">SAU totale (registre foncier)</div><div class="value">${data.totalSAU ? data.totalSAU + ' ha' : '–'}</div></div>
+    </div>
+    ${data.generalRemarks ? `<p style="font-size:10pt;color:#333;margin-top:10px;padding:10px 12px;background:#f9f9f9;border-left:3px solid #4a7c40;border-radius:0 4px 4px 0;">${data.generalRemarks.replace(/\n/g,'<br>')}</p>` : ''}
+
+    <h2>2. Bases légales / méthode d'évaluation</h2>
+    <div class="bases-legales">
+      <p>La valeur de rendement des entreprises et immeubles agricoles est définie comme suit, à l'article 10, al. 1, de la Loi fédérale sur le droit foncier rural du 4 octobre 1991 : <em>la valeur de rendement équivaut au capital dont l'intérêt, calculé au taux moyen applicable aux hypothèques de premier rang, correspond au revenu d'une entreprise ou d'un immeuble agricole exploité selon les usages du pays. Le revenu et le taux sont fixés d'après une moyenne pluriannuelle (période de calcul).</em> Aux termes de l'article premier de l'ordonnance sur le droit foncier rural du 4 octobre 1993, pour établir la valeur de rendement, on se fonde sur la <strong>période de calcul de 2009 à 2024</strong> et sur un <strong>taux d'intérêt moyen de 4.24%</strong>.</p>
+      <p>Les modalités d'estimation sont réglées par l'article 2 de la même ordonnance et les calculs de valeur de rendement sont effectués en application du <strong>Guide fédéral pour l'estimation de la valeur de rendement agricole (édition du 31 janvier 2018, entrée en vigueur le 1<sup>er</sup> avril 2018)</strong>.</p>
+      <p>La valeur de rendement des terres agricoles est déterminée selon un système de pointages faisant intervenir notamment la zone climatique agricole, la nature du sol, la grandeur et la forme, l'éloignement, la pente et les possibilités de mécanisation, ainsi que les accès à chaque parcelle.</p>
+      <p>La valeur de rendement des bâtiments est obtenue par capitalisation de la valeur locative annuelle à un taux déterminé en fonction de l'âge et de l'état de la construction (DUR). La valeur locative du logement du chef d'exploitation est calculée par un système de pointage (unités de logement × points qualité × CHF 6.40/point/UL), capitalisée au taux de 4.24%. Les bâtiments d'exploitation ruraux sont estimés par un système de modules selon leur type et leur état.</p>
+      <p>Le <strong>calcul de la charge maximale</strong> est établi conformément aux articles 73 et suivants de la LDFR. La base de calcul agricole (hors éléments non agricoles et logements supplémentaires au sens de l'art. 10 al. 3 LDFR) est augmentée de 35%.</p>
+    </div>
+
+    <h2>3. Surfaces agricoles (VR Sol)</h2>
+    ${parcels.length > 0 ? `
+    <table>
+      <tr><th>Description</th><th>Type</th><th>Surface (ha)</th><th>Zone</th><th>Qualité</th><th>Access.</th><th>Corrections</th><th style="text-align:right">VR (CHF)</th></tr>
+      ${parcels.map(p => {
+        const declivCorr = {'0-18':0,'19-35':-20,'36-50':-40,'>50':-60}[p.declivite];
+        const tailleCorr = {'>1.5':0,'0.5-1.5':-20,'<0.5':-60}[p.taille];
+        const distCorr = p.distKm > 3 ? Math.round(-Math.min((p.distKm-3) * (p.type==='terres_arables'?0.10:0.15), 0.5)*100) : 0;
+        const corrText = [
+          declivCorr ? `déclivité ${declivCorr}%` : '',
+          tailleCorr ? `taille ${tailleCorr}%` : '',
+          distCorr ? `distance ${distCorr}%` : '',
+        ].filter(Boolean).join(', ') || '–';
+        const typeLabels = {terres_arables:'Terres arables',prairies_fauche:'Prairies fauche',prairies_permanentes:'Prairies perm.',paturages:'Pâturages'};
+        const zoneLabels = {'A1A2B1B2':'A1/A2','A3B3A6':'A3/B3','A4A5B4B5':'A4/A5','B6':'B6','C1-4':'C1-4','C5-6':'C5-6','D1-6':'D1-6','F':'F','G':'G'};
+        return `<tr>
+          <td>${p.description || '–'}</td>
+          <td>${typeLabels[p.type]||p.type}</td>
+          <td>${p.surface.toFixed(2)}</td>
+          <td>${zoneLabels[p.zone]||p.zone}</td>
+          <td>${p.qualite.charAt(0).toUpperCase()+p.qualite.slice(1)}</td>
+          <td>${p.accessibilite}</td>
+          <td style="font-size:9pt">${corrText}</td>
+          <td style="text-align:right">${Math.round(p.vr).toLocaleString('fr-CH')}</td>
+        </tr>`;
+      }).join('')}
+      <tr class="total-row"><td colspan="7"><strong>Total VR Surfaces agricoles</strong></td><td style="text-align:right"><strong>${Math.round(r.vrSol).toLocaleString('fr-CH')}</strong></td></tr>
+    </table>` : '<p style="color:#888;font-size:10pt;">Aucune surface saisie.</p>'}
+
+    <h2>4. Bâtiments et logements</h2>
+    <h3>A. Logement du chef d'exploitation (évaluation à la valeur agricole)</h3>
+    <table>
+      <tr><th>UL (max 14 à val. agr.)</th><th>Points qualité</th><th>Val. locative annuelle</th><th>Taux capitalisation</th><th style="text-align:right">VR (CHF)</th></tr>
+      <tr>
+        <td>${data.logUL} UL</td>
+        <td>${data.logPoints} pts</td>
+        <td>${fmtCHF(Math.min(parseFloat(data.logUL),14) * parseFloat(data.logPoints) * 6.40)}/an</td>
+        <td>4.24%</td>
+        <td style="text-align:right">${Math.round(r.logCE).toLocaleString('fr-CH')}</td>
+      </tr>
+    </table>
+
+    ${otherLogements.length > 0 ? `
+    <h3>B. Autres logements (évaluation à la valeur non agricole)</h3>
+    <table>
+      <tr><th>Description</th><th>Loyer annuel marché</th><th>Taux capitalisation</th><th style="text-align:right">VR (CHF)</th></tr>
+      ${otherLogements.map(l => `<tr>
+        <td>${l.description||'–'}</td>
+        <td>${fmtCHF(l.locative)}/an</td>
+        <td>${(l.capRate*100).toFixed(1)}%</td>
+        <td style="text-align:right">${Math.round(l.vr).toLocaleString('fr-CH')}</td>
+      </tr>`).join('')}
+      <tr class="total-row"><td colspan="3"><strong>Total autres logements</strong></td><td style="text-align:right"><strong>${Math.round(r.logOther).toLocaleString('fr-CH')}</strong></td></tr>
+    </table>` : ''}
+
+    ${buildings.length > 0 ? `
+    <h3>C. Bâtiments d'exploitation agricole</h3>
+    <table>
+      <tr><th>Description</th><th>Val. locative annuelle</th><th>État / DUR</th><th>Taux capitalisation</th><th style="text-align:right">VR (CHF)</th></tr>
+      ${buildings.map(b => `<tr>
+        <td>${b.description||'–'}</td>
+        <td>${fmtCHF(b.locative)}/an</td>
+        <td>${BLDG_CAP_RATES[b.etat].label}</td>
+        <td>${(BLDG_CAP_RATES[b.etat].rate*100).toFixed(1)}%</td>
+        <td style="text-align:right">${Math.round(b.vr).toLocaleString('fr-CH')}</td>
+      </tr>`).join('')}
+      <tr class="total-row"><td colspan="4"><strong>Total bâtiments d'exploitation</strong></td><td style="text-align:right"><strong>${Math.round(r.batiments).toLocaleString('fr-CH')}</strong></td></tr>
+    </table>` : ''}
+
+    ${r.foret > 0 ? `
+    <h2>5. Forêts</h2>
+    <table>
+      <tr><th>Surface (ha)</th><th>VR indicative (CHF/ha)</th><th>Remarques</th><th style="text-align:right">VR (CHF)</th></tr>
+      <tr>
+        <td>${data.foretSurface} ha</td>
+        <td>${parseFloat(data.foretVrHa).toLocaleString('fr-CH')}</td>
+        <td>${data.foretRemarques||'–'}</td>
+        <td style="text-align:right">${Math.round(r.foret).toLocaleString('fr-CH')}</td>
+      </tr>
+    </table>` : ''}
+
+    ${otherElements.length > 0 ? `
+    <h2>6. Éléments non agricoles (art. 10 al. 3 LDFR)</h2>
+    <table>
+      <tr><th>Description</th><th>Rendement annuel</th><th>Taux capitalisation</th><th style="text-align:right">VR (CHF)</th></tr>
+      ${otherElements.map(e => `<tr>
+        <td>${e.description||'–'}</td>
+        <td>${fmtCHF(e.locative)}/an</td>
+        <td>${(e.capRate*100).toFixed(1)}%</td>
+        <td style="text-align:right">${Math.round(e.vr).toLocaleString('fr-CH')}</td>
+      </tr>`).join('')}
+    </table>` : ''}
+
+    <h2>7. Récapitulatif – Détermination de la valeur de rendement</h2>
+    <table>
+      <tr><th>Composante</th><th style="text-align:right">Valeur locative (CHF)</th><th style="text-align:right">VR (CHF)</th><th style="text-align:right">Part (%)</th></tr>
+      ${[
+        ['Surfaces agricoles (sol)', 0, r.vrSol],
+        ['Logement chef d\'exploitation', Math.min(parseFloat(data.logUL),14)*parseFloat(data.logPoints)*6.40, r.logCE],
+        ['Autres logements (non agr.)', r.logOther > 0 ? otherLogements.reduce((s,l)=>s+l.locative,0) : 0, r.logOther],
+        ['Bâtiments d\'exploitation', buildings.reduce((s,b)=>s+b.locative,0), r.batiments],
+        ['Forêts', 0, r.foret],
+        ['Éléments non agricoles (art. 10 al. 3 LDFR)', otherElements.reduce((s,e)=>s+e.locative,0), r.nonAgri],
+      ].filter(([,l,v]) => v > 0).map(([label, loc, val]) => `
+        <tr>
+          <td>${label}</td>
+          <td style="text-align:right">${loc > 0 ? Math.round(loc).toLocaleString('fr-CH') : '–'}</td>
+          <td style="text-align:right">${Math.round(val).toLocaleString('fr-CH')}</td>
+          <td style="text-align:right">${r.total>0?Math.round(val/r.total*100):0}%</td>
+        </tr>`).join('')}
+      <tr class="grand-total">
+        <td><strong>VALEUR DE RENDEMENT TOTALE</strong></td>
+        <td style="text-align:right"><strong>${Math.round(otherLogements.reduce((s,l)=>s+l.locative,0) + Math.min(parseFloat(data.logUL),14)*parseFloat(data.logPoints)*6.40 + buildings.reduce((s,b)=>s+b.locative,0) + otherElements.reduce((s,e)=>s+e.locative,0)).toLocaleString('fr-CH')}</strong></td>
+        <td style="text-align:right"><strong>${Math.round(r.total).toLocaleString('fr-CH')}</strong></td>
+        <td style="text-align:right"><strong>100%</strong></td>
+      </tr>
+    </table>
+
+    <h2>8. Charge maximale (art. 73 LDFR)</h2>
+    <div class="cm-box">
+      <p style="font-size:10pt;color:#333;margin:0 0 10px;">Conformément aux articles 73 et suivants de la LDFR, la charge maximale admissible est calculée comme suit :</p>
+      <table style="font-size:10pt;">
+        <tr><td>Valeur de rendement de la totalité des biens-fonds</td><td style="text-align:right"><strong>${Math.round(r.total).toLocaleString('fr-CH')}</strong></td></tr>
+        ${r.logOther > 0 ? `<tr><td style="padding-left:16px;">– Autres logements (valeur non agricole)</td><td style="text-align:right">– ${Math.round(r.logOther).toLocaleString('fr-CH')}</td></tr>` : ''}
+        ${r.nonAgri > 0 ? `<tr><td style="padding-left:16px;">– Éléments non agricoles (art. 10 al. 3 LDFR)</td><td style="text-align:right">– ${Math.round(r.nonAgri).toLocaleString('fr-CH')}</td></tr>` : ''}
+        <tr style="border-top:1px solid #d97706;"><td><strong>= Valeur de rendement agricole (base CM)</strong></td><td style="text-align:right"><strong>${Math.round(r.vrPurementAgricole).toLocaleString('fr-CH')}</strong></td></tr>
+        <tr><td style="padding-left:16px;">+ Augmentation de 35%</td><td style="text-align:right">+ ${Math.round(r.vrPurementAgricole * 0.35).toLocaleString('fr-CH')}</td></tr>
+        ${r.logOther > 0 ? `<tr><td style="padding-left:16px;">+ Autres logements</td><td style="text-align:right">+ ${Math.round(r.logOther).toLocaleString('fr-CH')}</td></tr>` : ''}
+        ${r.nonAgri > 0 ? `<tr><td style="padding-left:16px;">+ Éléments non agricoles</td><td style="text-align:right">+ ${Math.round(r.nonAgri).toLocaleString('fr-CH')}</td></tr>` : ''}
+        <tr style="background:#f59e0b20;border-top:2px solid #d97706;">
+          <td style="font-weight:bold;font-size:12pt;color:#92400e;padding:8px 6px;">CHARGE MAXIMALE (CHF arrondi)</td>
+          <td style="text-align:right;font-weight:bold;font-size:12pt;color:#92400e;padding:8px 6px;">${Math.round(r.chargeMaximale).toLocaleString('fr-CH')}</td>
+        </tr>
+      </table>
+    </div>
+
+    ${data.observations ? `
+    <h2>9. Observations et réserves</h2>
+    <p style="font-size:10pt;padding:10px 12px;background:#f9f9f9;border-left:3px solid #4a7c40;border-radius:0 4px 4px 0;">${data.observations.replace(/\n/g,'<br>')}</p>` : ''}
+
+    <div class="disclaimer">
+      <strong>Bases légales :</strong> La présente estimation est établie conformément à l'article 87 de la Loi fédérale sur le droit foncier rural (LDFR, RS 211.412.11), à l'Ordonnance sur le droit foncier rural (ODFR, RS 211.412.110) et au Guide pour l'estimation de la valeur de rendement agricole en vigueur depuis le 1<sup>er</sup> avril 2018. Le calcul de la charge maximale est basé sur les articles 73 et s. LDFR. <strong>Taux de capitalisation : 4.24%.</strong> Période de calcul de référence : 2009–2024. Cette estimation ne constitue pas un acte officiel au sens du droit foncier rural sans validation de l'autorité cantonale compétente.
+    </div>
+
+    <div class="signature-box">
+      <div>
+        <div class="sig-field">Lieu et date</div>
+        <div style="margin-top:4px;font-size:10pt;">${data.municipality||'_______________'}, le ${date}</div>
+      </div>
+      <div>
+        <div class="sig-field">Estimateur / Signature</div>
+        <div style="margin-top:4px;font-size:10pt;">${data.estimatorName||'_______________'}</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <strong>Terre à Terre</strong> – Fiduciaire agricole, Suisse romande | Rapport généré le ${new Date().toLocaleDateString('fr-CH')} | Usage interne
+    </div>
+    </body></html>
+  `;
+
+  const win = window.open('', '_blank');
+  win.document.write(reportHtml);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
+}
+
+async function generateDocx() {
+  if (typeof docx === 'undefined') {
+    alert('La bibliothèque DOCX est en cours de chargement. Veuillez réessayer dans quelques secondes.');
+    return;
+  }
+
+  const data = getFormData();
+  const r = getGrandTotal();
+  const date = data.estimationDate ? new Date(data.estimationDate).toLocaleDateString('fr-CH') : new Date().toLocaleDateString('fr-CH');
+
+  const {Document, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType,
+         BorderStyle, WidthType, ShadingType, Packer} = docx;
+
+  const titleStyle = {heading: HeadingLevel.HEADING_1, spacing: {before: 400, after: 200}};
+  const h2Style = {heading: HeadingLevel.HEADING_2, spacing: {before: 300, after: 150}};
+
+  function makeRow(cells, isHeader = false, isTotal = false) {
+    return new TableRow({
+      children: cells.map((text, i) => new TableCell({
+        shading: isHeader ? {fill: 'D4EFDF', type: ShadingType.CLEAR} :
+                 isTotal ? {fill: 'E8F5E9', type: ShadingType.CLEAR} : undefined,
+        children: [new Paragraph({
+          alignment: i === cells.length - 1 ? AlignmentType.RIGHT : AlignmentType.LEFT,
+          children: [new TextRun({text: String(text), bold: isHeader || isTotal, size: 20})]
+        })]
+      }))
+    });
+  }
+
+  const sections = [
+    new Paragraph({
+      children: [new TextRun({text: 'TERRE À TERRE', bold: true, size: 32, color: '4a7c40'}),
+                 new TextRun({text: '  –  Fiduciaire agricole, Suisse romande', size: 20, color: '7a9e70'})],
+    }),
+    new Paragraph({
+      children: [new TextRun({text: 'RAPPORT D\'ESTIMATION DE LA VALEUR DE RENDEMENT AGRICOLE', bold: true, size: 24, color: '4a7c40'})],
+      spacing: {before: 300, after: 100}
+    }),
+    new Paragraph({
+      children: [new TextRun({text: `Entreprise agricole complète | LDFR art. 10 · ODFR · Guide 01.04.2018 | Date : ${date}`, size: 18, color: '666666'})],
+      spacing: {after: 400}
+    }),
+
+    new Paragraph({text: '1. Mandat et procédure', ...h2Style}),
+    new Table({
+      width: {size: 100, type: WidthType.PERCENTAGE},
+      rows: [
+        makeRow(['Mandant', data.clientName||'–', 'Adresse', data.clientAddress||'–'], false),
+        makeRow(['N° de dossier', data.dossierNo||'–', 'Raison de l\'estimation', data.raisonEstimation||'–'], false),
+        makeRow(['Date de la visite', data.visitDate ? new Date(data.visitDate).toLocaleDateString('fr-CH') : '–', 'Date du rapport', date], false),
+        makeRow(['Estimateur', data.estimatorName||'–', 'Accompagné par', data.accompaniedBy||'–'], false),
+        makeRow(['Désignation', data.propertyName||'–', 'Commune/Canton', `${data.municipality||'–'} (${data.canton})`], false),
+        makeRow(['N° parcelle(s)', data.parcelNo||'–', 'SAU totale', data.totalSAU ? data.totalSAU+' ha' : '–'], false),
+        makeRow(['Type exploitation', data.exploitationType||'–', '', ''], false),
+      ]
+    }),
+    ...(data.generalRemarks ? [new Paragraph({children: [new TextRun({text: data.generalRemarks, size: 20, italics: true, color: '444444'})], spacing: {before: 100, after: 100}})] : []),
+
+    new Paragraph({text: '2. Surfaces agricoles', ...h2Style}),
+    ...(parcels.length > 0 ? [
+      new Table({
+        width: {size: 100, type: WidthType.PERCENTAGE},
+        rows: [
+          makeRow(['Description', 'Type', 'Surface (ha)', 'Zone', 'Qualité', 'VR (CHF)'], true),
+          ...parcels.map(p => {
+            const typeLabels = {terres_arables:'Terres arables',prairies_fauche:'Prairies fauche',prairies_permanentes:'Prairies perm.',paturages:'Pâturages'};
+            return makeRow([p.description||'–', typeLabels[p.type]||p.type, p.surface.toFixed(2), p.zone, p.qualite, Math.round(p.vr).toLocaleString('fr-CH')]);
+          }),
+          makeRow(['', '', '', '', 'Total VR Sol', Math.round(r.vrSol).toLocaleString('fr-CH')], false, true),
+        ]
+      })
+    ] : [new Paragraph({children: [new TextRun({text: 'Aucune surface saisie.', italics: true, color: '888888'})]})]),
+
+    new Paragraph({text: '3. Bâtiments', ...h2Style}),
+    new Paragraph({children: [new TextRun({text: 'A. Logement du chef d\'exploitation', bold: true, size: 22})], spacing: {before: 150, after: 100}}),
+    new Table({
+      width: {size: 100, type: WidthType.PERCENTAGE},
+      rows: [
+        makeRow(['UL', 'Points', 'Valeur locative', 'Taux capi.', 'VR (CHF)'], true),
+        makeRow([
+          `${data.logUL} UL`, `${data.logPoints} pts`,
+          fmtCHF(Math.min(parseFloat(data.logUL),14)*parseFloat(data.logPoints)*6.40)+'/an',
+          '4.24%', Math.round(r.logCE).toLocaleString('fr-CH')
+        ]),
+      ]
+    }),
+
+    ...(buildings.length > 0 ? [
+      new Paragraph({children: [new TextRun({text: 'C. Bâtiments d\'exploitation', bold: true, size: 22})], spacing: {before: 200, after: 100}}),
+      new Table({
+        width: {size: 100, type: WidthType.PERCENTAGE},
+        rows: [
+          makeRow(['Description', 'Val. locative/an', 'État', 'Taux', 'VR (CHF)'], true),
+          ...buildings.map(b => makeRow([b.description||'–', fmtCHF(b.locative), BLDG_CAP_RATES[b.etat].label, (BLDG_CAP_RATES[b.etat].rate*100).toFixed(1)+'%', Math.round(b.vr).toLocaleString('fr-CH')])),
+          makeRow(['','','','Total', Math.round(r.batiments).toLocaleString('fr-CH')], false, true),
+        ]
+      })
+    ] : []),
+
+    new Paragraph({text: '4. Récapitulatif – Valeur de rendement totale', ...h2Style}),
+    new Table({
+      width: {size: 100, type: WidthType.PERCENTAGE},
+      rows: [
+        makeRow(['Composante', 'VR (CHF)', 'Part (%)'], true),
+        ...[
+          ['Surfaces agricoles (sol)', r.vrSol],
+          ['Logement chef d\'exploitation', r.logCE],
+          ['Autres logements (valeur non agricole)', r.logOther],
+          ['Bâtiments d\'exploitation', r.batiments],
+          ['Forêts', r.foret],
+          ['Éléments non agricoles (art. 10 al. 3 LDFR)', r.nonAgri],
+        ].filter(([,v]) => v > 0).map(([label, val]) => makeRow([
+          label,
+          Math.round(val).toLocaleString('fr-CH'),
+          (r.total>0?Math.round(val/r.total*100):0)+'%'
+        ])),
+        makeRow(['VALEUR DE RENDEMENT TOTALE', Math.round(r.total).toLocaleString('fr-CH'), '100%'], false, true),
+      ]
+    }),
+
+    new Paragraph({text: '5. Charge maximale (art. 73 LDFR)', ...h2Style}),
+    new Table({
+      width: {size: 100, type: WidthType.PERCENTAGE},
+      rows: [
+        makeRow(['Élément', 'CHF'], true),
+        makeRow(['Valeur de rendement totale', Math.round(r.total).toLocaleString('fr-CH')]),
+        ...(r.logOther > 0 ? [makeRow(['– Autres logements (valeur non agricole)', '– ' + Math.round(r.logOther).toLocaleString('fr-CH')])] : []),
+        ...(r.nonAgri > 0 ? [makeRow(['– Éléments non agricoles (art. 10 al. 3 LDFR)', '– ' + Math.round(r.nonAgri).toLocaleString('fr-CH')])] : []),
+        makeRow(['= Valeur de rendement agricole (base CM)', Math.round(r.vrPurementAgricole).toLocaleString('fr-CH')], false, true),
+        makeRow(['+ Augmentation de 35%', Math.round(r.vrPurementAgricole * 0.35).toLocaleString('fr-CH')]),
+        ...(r.logOther > 0 ? [makeRow(['+ Autres logements', Math.round(r.logOther).toLocaleString('fr-CH')])] : []),
+        ...(r.nonAgri > 0 ? [makeRow(['+ Éléments non agricoles', Math.round(r.nonAgri).toLocaleString('fr-CH')])] : []),
+        makeRow(['CHARGE MAXIMALE (CHF arrondi)', Math.round(r.chargeMaximale).toLocaleString('fr-CH')], false, true),
+      ]
+    }),
+
+    ...(data.observations ? [
+      new Paragraph({text: '5. Observations et réserves', ...h2Style}),
+      new Paragraph({children: [new TextRun({text: data.observations, size: 20})], spacing: {after: 200}}),
+    ] : []),
+
+    new Paragraph({spacing: {before: 600}}),
+    new Paragraph({
+      children: [new TextRun({
+        text: 'Base légale : La présente estimation est établie conformément à la LDFR (RS 211.412.11), l\'ODFR (RS 211.412.110) et au Guide d\'estimation en vigueur depuis le 1er avril 2018. Taux capitalisation 4.24%. Période de calcul 2009–2024.',
+        size: 16, italics: true, color: '666666'
+      })],
+      spacing: {after: 400}
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({text: `${data.municipality||'_______________'}, le ${date}        `, size: 20}),
+        new TextRun({text: `Estimateur : ${data.estimatorName||'_______________'}`, size: 20}),
+      ]
+    }),
+    new Paragraph({
+      children: [new TextRun({text: `\n\n\n_________________________        _________________________`, size: 20})],
+      spacing: {before: 800}
+    }),
+    new Paragraph({
+      children: [new TextRun({text: `Lieu et date                              Signature`, size: 18, color: '888888'})],
+    }),
+  ];
+
+  const doc = new Document({
+    creator: 'Terre à Terre – Fiduciaire agricole',
+    title: `Valeur de Rendement Agricole – ${data.propertyName||'Estimation'}`,
+    description: 'Rapport d\'estimation VRA conforme LDFR/ODFR',
+    sections: [{
+      properties: {page: {margin: {top: 1000, bottom: 1000, left: 1200, right: 1200}}},
+      children: sections
+    }]
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const filename = `VRA_${(data.propertyName||'Estimation').replace(/[^a-z0-9]/gi,'_')}_${date.replace(/\./g,'-')}.docx`;
+  saveAs(blob, filename);
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetForm() {
+  if (!confirm('Effacer toutes les données et commencer une nouvelle estimation ?')) return;
+  parcels = []; buildings = []; otherLogements = []; otherElements = [];
+  parcelCounter = buildingCounter = logementCounter = elementCounter = 0;
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type === 'number') el.value = el.id === 'log-ul' ? '8' : el.id === 'log-points' ? '90' : el.id === 'foret-vr-ha' ? '2000' : '0';
+    else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+  goToStep(1);
+}
+
+// ============================================================
+// HELP SYSTEM — Niveau 1
+// ============================================================
+const HELP_TOPICS = {
+  guide_general: {
+    title: 'Vue d\'ensemble — Méthode d\'estimation VRA',
+    loi: 'LDFR art. 10 · ODFR art. 1–2 · Guide d\'estimation 01.04.2018',
+    text: `<p>La <strong>valeur de rendement agricole (VR)</strong> est la valeur légale d'une entreprise agricole, définie comme la capitalisation du revenu moyen à long terme. C'est la seule valeur de référence admise pour les transferts soumis à la LDFR.</p>
+<p style="margin-top:8px"><strong>Les 5 composantes du calcul :</strong></p>
+<ol style="padding-left:18px;line-height:2.2;margin-top:4px">
+  <li>VR des <strong>surfaces agricoles</strong> (sol) — Étape 2</li>
+  <li>VR du <strong>logement du chef d'exploitation</strong> (CE) — Étape 3</li>
+  <li>VR des <strong>bâtiments d'exploitation</strong> — Étape 3</li>
+  <li>VR des <strong>forêts</strong> — Étape 4</li>
+  <li><strong>Éléments non agricoles</strong> (art. 10 al. 3 LDFR) — Étape 4</li>
+</ol>
+<p style="margin-top:10px">Le <strong>taux de capitalisation de base</strong> est <span style="font-size:15px;font-weight:bold;color:#2d6a4f">4.24%</span><br>Période de référence : 2009–2024 (ODFR art. 1)</p>
+<p style="margin-top:8px;background:#f0f7f4;padding:8px;border-radius:4px">La <strong>charge maximale</strong> (art. 73 LDFR) = VR agricole × 1.35 + éléments non agricoles. Elle correspond à la limite légale des hypothèques admissibles.</p>`,
+    visite: `<strong>Avant de partir en visite :</strong><br>
+• Récupérer l'extrait cadastral (surfaces officielles, parcelles)<br>
+• Vérifier la zone agricole et les plans de zone communaux<br>
+• Demander la dernière déclaration de surface (formulaire 100 OPD)<br>
+• Identifier les servitudes et droits réels (extrait RF)<br>
+• Note du bail à ferme en cours (durée, fermier, conditions)`
+  },
+  entreprise_agricole: {
+    title: 'Entreprise agricole — définition légale',
+    loi: 'LDFR art. 7 al. 1 · Seuil USMO (Unité Standard de Main-d\'Œuvre)',
+    text: `<p>Selon l'<strong>art. 7 LDFR</strong>, une entreprise agricole est un ensemble de biens-fonds agricoles dont l'exploitation représente au moins une <strong>USMO</strong> (Unité Standard de Main-d'Œuvre).</p>
+<p style="margin-top:8px"><strong>1 USMO ≈ 2 200 heures de travail annuelles.</strong><br>En pratique, environ 15–20 ha de grandes cultures ou 25–35 vaches laitières ou 30–40 ha de prairies.</p>
+<p style="margin-top:8px;background:#fef9c3;padding:8px;border-radius:4px"><strong>⚠ Distinction importante :</strong><br>
+Si le bien <em>n'atteint pas</em> le seuil USMO, il constitue un simple <strong>immeuble agricole</strong> et non une entreprise. Les règles de prix, de droit de préemption et de transfert diffèrent (LDFR art. 63 ss).<br>
+En cas de doute, contacter la Commission foncière cantonale.</p>
+<p style="margin-top:8px">Pour les exploitations mixtes (agri + viti, agri + agritourisme), les éléments accessoires restent inclus (art. 7 al. 4).</p>`,
+    visite: `<strong>À vérifier sur place :</strong><br>
+• Type de production et main-d'œuvre effective<br>
+• Activités annexes et leur importance relative<br>
+• Bail à ferme en cours : qui exploite ? Depuis quand ?<br>
+• Statut de l'exploitant (propriétaire, successeur désigné)<br>
+• Demander le plus récent calcul USMO (souvent disponible à la caisse maladie agricole)`
+  },
+  zone_climatique: {
+    title: 'Zone climatique agricole — tableau VR de base',
+    loi: 'Guide ODFR 01.04.2018 — Tableau II.2 : Valeurs de rendement de base (CHF/ha)',
+    text: `<p>La zone climatique détermine la <strong>valeur de base (CHF/ha)</strong>. Elle est fixée par la carte des aptitudes climatiques agricoles de l'OFAG (Office fédéral de l'agriculture).</p>
+<table style="width:100%;font-size:11px;margin-top:10px;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:5px;text-align:left;border:1px solid #b7dfbb">Zone</th><th style="padding:5px;border:1px solid #b7dfbb">Région / Description</th><th style="padding:5px;text-align:right;border:1px solid #b7dfbb">VR max (sol bonne, acc.4)</th></tr>
+  <tr><td style="padding:4px 5px;border:1px solid #eee"><strong>A1/A2/B1/B2</strong></td><td style="padding:4px 5px;border:1px solid #eee">Plateau bas &lt;500m — VD, FR, GE, NE plaine</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right"><strong>7'730</strong> CHF/ha</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:4px 5px;border:1px solid #eee"><strong>A3/B3/A6</strong></td><td style="padding:4px 5px;border:1px solid #eee">Collines 500–700m</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">7'470 CHF/ha</td></tr>
+  <tr><td style="padding:4px 5px;border:1px solid #eee"><strong>A4/A5/B4/B5</strong></td><td style="padding:4px 5px;border:1px solid #eee">Pré-Alpes 700–1000m</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">7'100 CHF/ha</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:4px 5px;border:1px solid #eee"><strong>B6</strong></td><td style="padding:4px 5px;border:1px solid #eee">Collines de montagne</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">6'620 CHF/ha</td></tr>
+  <tr><td style="padding:4px 5px;border:1px solid #eee"><strong>C1–4</strong></td><td style="padding:4px 5px;border:1px solid #eee">Alpes basses</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">6'430 CHF/ha</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:4px 5px;border:1px solid #eee"><strong>C5–6</strong></td><td style="padding:4px 5px;border:1px solid #eee">Alpes moyennes</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">5'650 CHF/ha</td></tr>
+  <tr><td style="padding:4px 5px;border:1px solid #eee"><strong>D1–6</strong></td><td style="padding:4px 5px;border:1px solid #eee">Alpes hautes</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">5'010 CHF/ha</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:4px 5px;border:1px solid #eee"><strong>F</strong></td><td style="padding:4px 5px;border:1px solid #eee">Alpes très hautes</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">3'820 CHF/ha</td></tr>
+  <tr><td style="padding:4px 5px;border:1px solid #eee"><strong>G</strong></td><td style="padding:4px 5px;border:1px solid #eee">Limite des cultures</td><td style="padding:4px 5px;border:1px solid #eee;text-align:right">3'150 CHF/ha</td></tr>
+</table>
+<p style="margin-top:8px;font-size:11px;padding:6px 8px;background:#f0f7f4;border-radius:4px">📌 Pour le plateau vaudois, fribourgeois, genevois ou neuchâtelois en dessous de 500m : utilisez <strong>A1/A2/B1/B2</strong>. Vérifiez sur le géoportail cantonal (aptitudes climatiques).</p>`,
+    visite: `<strong>À vérifier :</strong><br>
+• Altitude approximative (GPS ou carte nationale 1:25'000)<br>
+• Confirmer via le géoportail cantonal (couche "aptitudes climatiques")<br>
+• En cas de zones de transition, demander avis à l'autorité cantonale<br>
+• Pour VD : <a href="https://www.geo.vd.ch" style="color:#2d6a4f">geo.vd.ch</a> · Pour FR : <a href="https://map.geo.fr.ch" style="color:#2d6a4f">map.geo.fr.ch</a>`
+  },
+  qualite_sol: {
+    title: 'Qualité du sol — critères d\'évaluation',
+    loi: 'Guide ODFR 01.04.2018 — Critères de classification de la qualité du sol',
+    text: `<p>Trois catégories, définies par le potentiel agronomique du sol :</p>
+<table style="width:100%;font-size:12px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:6px;text-align:left;border:1px solid #b7dfbb">Qualité</th><th style="padding:6px;border:1px solid #b7dfbb">Critères principaux</th></tr>
+  <tr><td style="padding:7px;border:1px solid #eee;color:#166534;font-weight:bold">Bonne</td><td style="padding:7px;border:1px solid #eee">Sol profond (&gt;60 cm), fertile, bonne rétention d'eau, peu de pierres, structure stable. Drainage naturel bon. Production potentielle élevée et régulière.</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee;color:#92400e;font-weight:bold">Moyenne</td><td style="padding:7px;border:1px solid #eee">Profondeur intermédiaire (30–60 cm). Quelques limitations : cailloux modérés, drainage partiel, légère acidité. Production potentielle normale mais variable.</td></tr>
+  <tr><td style="padding:7px;border:1px solid #eee;color:#7f1d1d;font-weight:bold">Mauvaise</td><td style="padding:7px;border:1px solid #eee">Sol mince (&lt;30 cm), fortement pierreux, très humide (hydromorphe), très sec (secs d'été), ou fortement acide. Production potentielle limitée et irrégulière.</td></tr>
+</table>
+<p style="background:#fef9c3;padding:8px;border-radius:4px;font-size:12px">💡 <strong>Conseil :</strong> En cas de qualité hétérogène sur la même parcelle, divisez-la en 2 groupes. En cas de doute entre deux catégories, optez pour la catégorie inférieure.</p>`,
+    visite: `<strong>À observer sur place :</strong><br>
+• Profil de sol avec sonde Pürckhauer ou bêche (3–5 sondages par parcelle)<br>
+• Texture au toucher : argileuse (collante), limoneuse (douce), sableuse (grenue)<br>
+• Végétation indicatrice : rumex, joncs = humidité · mousse = acidité<br>
+• Historique : prairies longue durée, anciens champs drainés, remblais<br>
+• Traces d'hydromorphie (taches rouille/gris dans le profil)`
+  },
+  accessibilite: {
+    title: 'Accessibilité — niveaux 1 à 4',
+    loi: 'Guide ODFR 01.04.2018 — Niveaux d\'accessibilité (intégrés dans le tableau VR de base)',
+    text: `<p>L'accessibilité est <strong>intégrée dans le tableau VR de base</strong> sous forme de colonnes 1 à 4. Elle reflète la facilité d'accès mécanisé aux surfaces agricoles.</p>
+<table style="width:100%;font-size:12px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:6px;text-align:center;border:1px solid #b7dfbb;width:50px">Niveau</th><th style="padding:6px;border:1px solid #b7dfbb">Description</th><th style="padding:6px;text-align:center;border:1px solid #b7dfbb">Impact relatif</th></tr>
+  <tr><td style="padding:7px;border:1px solid #eee;text-align:center;font-size:16px;font-weight:bold;color:#166534">4</td><td style="padding:7px;border:1px solid #eee">Route carrossable pour <strong>camions ≥ 3.5t</strong> — situation normale en plaine</td><td style="padding:7px;border:1px solid #eee;text-align:center">Valeur maximale</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee;text-align:center;font-size:16px;font-weight:bold;color:#92400e">3</td><td style="padding:7px;border:1px solid #eee">Chemin accessible aux <strong>tracteurs uniquement</strong> (pas aux camions)</td><td style="padding:7px;border:1px solid #eee;text-align:center">–15%</td></tr>
+  <tr><td style="padding:7px;border:1px solid #eee;text-align:center;font-size:16px;font-weight:bold;color:#b91c1c">2</td><td style="padding:7px;border:1px solid #eee">Accès uniquement par <strong>téléphérique ou câble</strong></td><td style="padding:7px;border:1px solid #eee;text-align:center">–30%</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee;text-align:center;font-size:16px;font-weight:bold;color:#7f1d1d">1</td><td style="padding:7px;border:1px solid #eee"><strong>Sentier muletier</strong> uniquement — accès à pied ou à cheval</td><td style="padding:7px;border:1px solid #eee;text-align:center">–41%</td></tr>
+</table>
+<p style="font-size:12px;color:#666">Les pourcentages sont approximatifs — les valeurs exactes varient selon la zone climatique car elles sont directement intégrées dans le tableau VR de base.</p>`,
+    visite: `<strong>À évaluer sur place :</strong><br>
+• Type de revêtement (asphalte, gravier, chemin de terre battu)<br>
+• Largeur du chemin (camion : min. 3m praticable)<br>
+• Pente du chemin d'accès (camion-benne : max ~10%)<br>
+• Praticabilité en toutes saisons (déneigement en hiver ?)<br>
+• Photographier les accès les plus contraignants`
+  },
+  declivite: {
+    title: 'Déclivité — correction sur la valeur de base',
+    loi: 'Guide ODFR 01.04.2018 — Correction de déclivité (s\'applique après le tableau VR de base)',
+    text: `<p>La pente réduit la mécanisabilité et donc la valeur économique. La correction s'applique <em>en plus</em> des corrections d'accessibilité et de taille.</p>
+<table style="width:100%;font-size:12px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:6px;border:1px solid #b7dfbb">Déclivité</th><th style="padding:6px;border:1px solid #b7dfbb">Mécanisabilité</th><th style="padding:6px;text-align:center;border:1px solid #b7dfbb">Déduction</th></tr>
+  <tr><td style="padding:7px;border:1px solid #eee"><strong>0–18%</strong></td><td style="padding:7px;border:1px solid #eee">Entièrement mécanisable — machines agricoles standard</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#166534;font-weight:bold">0%</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee"><strong>19–35%</strong></td><td style="padding:7px;border:1px solid #eee">Partiellement mécanisable — machines spéciales de montagne</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#92400e;font-weight:bold">–20%</td></tr>
+  <tr><td style="padding:7px;border:1px solid #eee"><strong>36–50%</strong></td><td style="padding:7px;border:1px solid #eee">Très difficile — engins de montagne spéciaux uniquement</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#b91c1c;font-weight:bold">–40%</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee"><strong>&gt;50%</strong></td><td style="padding:7px;border:1px solid #eee">Non mécanisable — travail entièrement manuel</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#7f1d1d;font-weight:bold">–60%</td></tr>
+</table>
+<p style="background:#fef9c3;padding:8px;border-radius:4px;font-size:12px"><strong>Référence :</strong> 18% = 180m de dénivelé pour 1 km horizontal. Mesurer la pente <em>représentative</em> de la parcelle (pas la pente maximale).</p>`,
+    visite: `<strong>À mesurer sur place :</strong><br>
+• Application mobile : "Clinometer" (iOS/Android) — gratuite<br>
+• Ou sangle à niveau + règle (méthode classique)<br>
+• Mesurer la pente sur la portion la plus représentative<br>
+• Photographier les zones à forte déclivité<br>
+• Vérifier si des murs de soutènement / terrasses réduisent la déclivité effective`
+  },
+  taille_parcelle: {
+    title: 'Taille de parcelle — correction',
+    loi: 'Guide ODFR 01.04.2018 — Correction de taille de parcelle',
+    text: `<p>Les petites parcelles génèrent des surcoûts (déplacements, manœuvres, inefficacité) qui réduisent leur valeur économique.</p>
+<table style="width:100%;font-size:12px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:6px;border:1px solid #b7dfbb">Surface</th><th style="padding:6px;border:1px solid #b7dfbb">Situation</th><th style="padding:6px;text-align:center;border:1px solid #b7dfbb">Déduction</th></tr>
+  <tr><td style="padding:7px;border:1px solid #eee"><strong>&gt;1.5 ha</strong></td><td style="padding:7px;border:1px solid #eee">Taille économiquement viable — aucun surcoût significatif</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#166534;font-weight:bold">0%</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee"><strong>0.5–1.5 ha</strong></td><td style="padding:7px;border:1px solid #eee">Petite parcelle — surcoûts modérés</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#92400e;font-weight:bold">–20%</td></tr>
+  <tr><td style="padding:7px;border:1px solid #eee"><strong>&lt;0.5 ha</strong></td><td style="padding:7px;border:1px solid #eee">Très petite — surcoûts importants, difficile à exploiter seule</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#7f1d1d;font-weight:bold">–60%</td></tr>
+</table>
+<p style="background:#d4edda;padding:8px;border-radius:4px;font-size:12px">💡 <strong>Regroupement :</strong> Plusieurs petites parcelles contiguës exploitées ensemble peuvent être saisies comme une seule surface (surface totale = déduction réduite ou supprimée).</p>`,
+    visite: `<strong>À vérifier :</strong><br>
+• Surfaces nettes selon extrait cadastral (mensuration officielle)<br>
+• Parcelles contiguës pouvant être groupées en un seul îlot<br>
+• Haies, fossés, chemins divisant les parcelles<br>
+• Forme géométrique (rectangulaire = plus efficace que parcelle triangulaire)`
+  },
+  distance: {
+    title: 'Distance aux bâtiments d\'exploitation',
+    loi: 'Guide ODFR 01.04.2018 — Correction de distance (au-delà de 3 km)',
+    text: `<p>Une grande distance entre les surfaces et les bâtiments d'exploitation génère des coûts de transport supplémentaires. La déduction s'applique <strong>uniquement au-delà de 3 km</strong>.</p>
+<table style="width:100%;font-size:12px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:6px;border:1px solid #b7dfbb">Distance</th><th style="padding:6px;text-align:center;border:1px solid #b7dfbb">Terres arables</th><th style="padding:6px;text-align:center;border:1px solid #b7dfbb">Surfaces herbagères</th></tr>
+  <tr><td style="padding:7px;border:1px solid #eee">0 – 3 km</td><td style="padding:7px;border:1px solid #eee;text-align:center">Aucune déduction</td><td style="padding:7px;border:1px solid #eee;text-align:center">Aucune déduction</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee">Par km &gt; 3 km</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#b91c1c;font-weight:bold">–10%/km</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#b91c1c;font-weight:bold">–15%/km</td></tr>
+  <tr><td style="padding:7px;border:1px solid #eee">Maximum</td><td style="padding:7px;border:1px solid #eee;text-align:center">–50%</td><td style="padding:7px;border:1px solid #eee;text-align:center">–50%</td></tr>
+</table>
+<p style="font-size:12px;color:#555;margin-top:6px"><strong>Distance mesurée :</strong> par la route praticable par un tracteur (pas à vol d'oiseau). Mesurez avec Google Maps (itinéraire) ou un GPS.</p>`,
+    visite: `<strong>À mesurer :</strong><br>
+• Distance par la route d'accès (Google Maps → mode tracteur si possible)<br>
+• Prendre le chemin réellement emprunté lors des travaux<br>
+• Si plusieurs parcelles éloignées : mesurer chacune séparément<br>
+• Note : si les parcelles sont affermées à un fermier voisin, la distance peut ne pas s'appliquer`
+  },
+  logement_ce: {
+    title: 'Logement du chef d\'exploitation (CE)',
+    loi: 'LDFR art. 7 al. 1 · Guide ODFR 2018 — Module logement CE · Taux 4.24%',
+    text: `<p>Le logement du chef d'exploitation bénéficie de la <strong>valeur agricole favorable</strong> (taux 4.24%), contrairement aux autres logements évalués au taux du marché.</p>
+<p style="margin-top:8px"><strong>Formule de calcul :</strong></p>
+<div style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;margin:8px 0">
+  1. Valeur locative = UL × points × CHF 6.40<br>
+  2. VR logement CE = Valeur locative ÷ 4.24%
+</div>
+<p><strong>Limite légale :</strong> Maximum <strong>14 UL</strong> évaluées au taux agricole (CHF 6.40/pt/UL).<br>Au-delà de 14 UL : taux non agricole CHF 12.80/pt/UL.</p>
+<p style="margin-top:8px;background:#fef9c3;padding:8px;border-radius:4px;font-size:12px"><strong>Conditions (LDFR art. 7) :</strong> Le logement doit être effectivement occupé par l'exploitant. L'exploitation doit atteindre le seuil USMO. Si l'exploitant est à la retraite et que le successeur n'est pas encore en place, la règle peut être différente.</p>`,
+    visite: `<strong>À vérifier sur place :</strong><br>
+• L'exploitant réside-t-il effectivement dans ce logement ?<br>
+• Compter le nombre de pièces habitables (voir aide UL)<br>
+• État général : cuisine, salle(s) de bain, chauffage, fenêtres<br>
+• Année de construction et dernière rénovation importante<br>
+• Y a-t-il un logement de retraite adjacent (parents) ?`
+  },
+  ul_calcul: {
+    title: 'Unités de logement (UL) et points de qualité',
+    loi: 'Guide ODFR 2018 — Module logement CE — Comptage UL et barème de qualité',
+    text: `<p><strong>Unité de logement (UL) :</strong> = 1 pièce habitable principale de 15–18 m²</p>
+<table style="width:100%;font-size:11px;margin:8px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:5px;border:1px solid #b7dfbb">Élément</th><th style="padding:5px;border:1px solid #b7dfbb">UL</th></tr>
+  <tr><td style="padding:5px;border:1px solid #eee">Chambre à coucher</td><td style="padding:5px;border:1px solid #eee">1 UL chacune</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee">Séjour</td><td style="padding:5px;border:1px solid #eee">1 UL</td></tr>
+  <tr><td style="padding:5px;border:1px solid #eee">Cuisine séparée</td><td style="padding:5px;border:1px solid #eee">1 UL</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee">Salle à manger distincte</td><td style="padding:5px;border:1px solid #eee">1 UL</td></tr>
+  <tr><td style="padding:5px;border:1px solid #eee">Cuisine-séjour &gt;25 m²</td><td style="padding:5px;border:1px solid #eee">1.5 UL</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee">Cave, comble non aménagé, buanderie, couloir</td><td style="padding:5px;border:1px solid #eee;color:#666">Non compté</td></tr>
+</table>
+<hr style="margin:12px 0;border-color:#eee">
+<p><strong>Points de qualité :</strong></p>
+<table style="width:100%;font-size:11px;margin:8px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:5px;text-align:center;border:1px solid #b7dfbb">Points</th><th style="padding:5px;border:1px solid #b7dfbb">Niveau</th><th style="padding:5px;border:1px solid #b7dfbb">Caractéristiques typiques</th></tr>
+  <tr><td style="padding:5px;border:1px solid #eee;text-align:center">40–60</td><td style="padding:5px;border:1px solid #eee">Simple</td><td style="padding:5px;border:1px solid #eee">Cuisine et SdB basiques, vieux, peu rénové</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee;text-align:center">70–100</td><td style="padding:5px;border:1px solid #eee">Standard</td><td style="padding:5px;border:1px solid #eee">Cuisine et SdB correctes, bon état général</td></tr>
+  <tr><td style="padding:5px;border:1px solid #eee;text-align:center">110–130</td><td style="padding:5px;border:1px solid #eee">Confortable</td><td style="padding:5px;border:1px solid #eee">Cuisine équipée, double vitrage, 2 SdB, récent</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee;text-align:center">140–200</td><td style="padding:5px;border:1px solid #eee">Luxueux</td><td style="padding:5px;border:1px solid #eee">Très haut standing, matériaux nobles, domotique</td></tr>
+</table>`,
+    visite: `<strong>À compter et noter sur place :</strong><br>
+• Plan simple pièce par pièce avec surface approx.<br>
+• Photographier cuisine, SdB, séjour<br>
+• Année de construction du bâtiment principal<br>
+• Date des dernières rénovations majeures (toit, cuisine, SdB, chauffage)<br>
+• Qualité des fenêtres (simple, double, triple vitrage)`
+  },
+  batiment_etat_dur: {
+    title: 'État et DUR des bâtiments d\'exploitation',
+    loi: 'Guide ODFR 2018 — Taux de capitalisation selon Durée Utilité Résiduelle (DUR)',
+    text: `<p>La <strong>DUR (Durée Utilité Résiduelle)</strong> est la durée de vie économique résiduelle du bâtiment dans sa fonction actuelle. Plus la DUR est courte, plus le taux est élevé et la valeur faible.</p>
+<table style="width:100%;font-size:12px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:6px;border:1px solid #b7dfbb">État</th><th style="padding:6px;text-align:center;border:1px solid #b7dfbb">DUR indicative</th><th style="padding:6px;text-align:center;border:1px solid #b7dfbb">Taux capitalisation</th></tr>
+  <tr><td style="padding:7px;border:1px solid #eee"><strong>Neuf / Très bon</strong></td><td style="padding:7px;border:1px solid #eee;text-align:center">≥ 70 ans</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#166534;font-size:14px;font-weight:bold">5.3%</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee"><strong>Bon</strong></td><td style="padding:7px;border:1px solid #eee;text-align:center">~50 ans</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#1e40af;font-size:14px;font-weight:bold">6.5%</td></tr>
+  <tr><td style="padding:7px;border:1px solid #eee"><strong>Moyen</strong></td><td style="padding:7px;border:1px solid #eee;text-align:center">~30 ans</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#92400e;font-size:14px;font-weight:bold">8.5%</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:7px;border:1px solid #eee"><strong>Mauvais</strong></td><td style="padding:7px;border:1px solid #eee;text-align:center">~20 ans</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#b91c1c;font-size:14px;font-weight:bold">11.0%</td></tr>
+  <tr><td style="padding:7px;border:1px solid #eee"><strong>Très mauvais</strong></td><td style="padding:7px;border:1px solid #eee;text-align:center">≤ 15 ans</td><td style="padding:7px;border:1px solid #eee;text-align:center;color:#7f1d1d;font-size:14px;font-weight:bold">15.2%</td></tr>
+</table>
+<p style="font-size:12px;color:#555">Le taux = 4.24% (base agricole) + supplément entretien/risque selon la dégradation de la DUR.</p>`,
+    visite: `<strong>À inspecter :</strong><br>
+• Toiture : type, étanchéité, tuiles/tôle manquantes, mousses<br>
+• Structure porteuse : béton armé, charpente bois, maçonnerie (signes de fissure)<br>
+• Installations : électricité (tableau), eau, ventilation<br>
+• Humidité : taches, efflorescence, moisissures<br>
+• Année de construction et dernière rénovation majeure<br>
+• Affaissement de la dalle, plancher, murs`
+  },
+  batiment_locative: {
+    title: 'Valeur locative annuelle des bâtiments agricoles',
+    loi: 'Guide ODFR 2018 — Modules de valeur locative par type de bâtiment',
+    text: `<p>La valeur locative = le loyer annuel hypothétique qu'un fermier paierait sur le marché libre pour utiliser ce bâtiment dans sa fonction.</p>
+<table style="width:100%;font-size:11px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:5px;border:1px solid #b7dfbb">Type de bâtiment</th><th style="padding:5px;text-align:center;border:1px solid #b7dfbb">Unité</th><th style="padding:5px;text-align:center;border:1px solid #b7dfbb">Plage indicative</th></tr>
+  <tr><td style="padding:5px;border:1px solid #eee">Étable bovins (lait ou viande)</td><td style="padding:5px;border:1px solid #eee;text-align:center">CHF/m²/an</td><td style="padding:5px;border:1px solid #eee;text-align:center">15 – 40</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee">Étable porcs / volaille</td><td style="padding:5px;border:1px solid #eee;text-align:center">CHF/m²/an</td><td style="padding:5px;border:1px solid #eee;text-align:center">20 – 50</td></tr>
+  <tr><td style="padding:5px;border:1px solid #eee">Grange à fourrage</td><td style="padding:5px;border:1px solid #eee;text-align:center">CHF/m²/an</td><td style="padding:5px;border:1px solid #eee;text-align:center">5 – 15</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee">Hangar machines / remise</td><td style="padding:5px;border:1px solid #eee;text-align:center">CHF/m²/an</td><td style="padding:5px;border:1px solid #eee;text-align:center">5 – 10</td></tr>
+  <tr><td style="padding:5px;border:1px solid #eee">Serre maraîchère</td><td style="padding:5px;border:1px solid #eee;text-align:center">CHF/m²/an</td><td style="padding:5px;border:1px solid #eee;text-align:center">20 – 60</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:5px;border:1px solid #eee">Cave viticole / pressoir</td><td style="padding:5px;border:1px solid #eee;text-align:center">CHF/m³/an</td><td style="padding:5px;border:1px solid #eee;text-align:center">8 – 20</td></tr>
+  <tr><td style="padding:5px;border:1px solid #eee">Silo (maïs, grains)</td><td style="padding:5px;border:1px solid #eee;text-align:center">CHF/m³/an</td><td style="padding:5px;border:1px solid #eee;text-align:center">5 – 12</td></tr>
+</table>
+<p style="background:#fef9c3;padding:8px;border-radius:4px;font-size:11px"><strong>Important :</strong> Ces valeurs sont indicatives. La valeur locative doit être justifiée dans le rapport (surface, équipements, état). Ne pas saisir la valeur vénale ni le coût de reconstruction.</p>`,
+    visite: `<strong>À mesurer sur place :</strong><br>
+• Surface au sol (m²) par bâtiment ou par compartiment<br>
+• Volume utile (m³) si cave, silo ou hangar en hauteur<br>
+• Équipements fixes intégrés (traite, ventilation, quai de chargement)<br>
+• Capacité de stabulation (nombre de places, type : libre, attaché)<br>
+• Photographier chaque bâtiment avec vue d'ensemble + intérieur`
+  },
+  foret: {
+    title: 'Forêts — valeur indicative cantonale',
+    loi: 'LDFR art. 2 al. 1 · Valeur indicative fixée par l\'autorité cantonale forestière',
+    text: `<p>Les forêts faisant partie de l'entreprise agricole sont évaluées séparément, selon les <strong>valeurs indicatives cantonales</strong> de l'autorité forestière compétente.</p>
+<table style="width:100%;font-size:12px;margin:10px 0;border-collapse:collapse">
+  <tr style="background:#d4edda"><th style="padding:5px;border:1px solid #b7dfbb">Canton</th><th style="padding:5px;border:1px solid #b7dfbb">Fourchette indicative</th><th style="padding:5px;border:1px solid #b7dfbb">Contact</th></tr>
+  <tr><td style="padding:6px;border:1px solid #eee"><strong>Vaud (VD)</strong></td><td style="padding:6px;border:1px solid #eee">CHF 1'500 – 4'000/ha</td><td style="padding:6px;border:1px solid #eee">SFP Vaud — Direction générale de l'environnement</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:6px;border:1px solid #eee"><strong>Fribourg (FR)</strong></td><td style="padding:6px;border:1px solid #eee">CHF 1'200 – 3'500/ha</td><td style="padding:6px;border:1px solid #eee">SFB Fribourg</td></tr>
+  <tr><td style="padding:6px;border:1px solid #eee"><strong>Neuchâtel (NE)</strong></td><td style="padding:6px;border:1px solid #eee">CHF 800 – 2'500/ha</td><td style="padding:6px;border:1px solid #eee">SFPNR Neuchâtel</td></tr>
+  <tr style="background:#f9f9f9"><td style="padding:6px;border:1px solid #eee"><strong>Genève (GE)</strong></td><td style="padding:6px;border:1px solid #eee">CHF 2'000 – 5'000/ha</td><td style="padding:6px;border:1px solid #eee">Office cantonal de l'agriculture et de la nature</td></tr>
+</table>
+<p style="background:#fef9c3;padding:8px;border-radius:4px;font-size:12px"><strong>⚠ Recommandation :</strong> Contactez l'autorité forestière cantonale ou un garde forestier pour obtenir une valeur officielle spécifique au peuplement concerné. Les valeurs ci-dessus sont approximatives.</p>`,
+    visite: `<strong>À observer en forêt :</strong><br>
+• Type de peuplement : résineux (épicéa, sapin), feuillus (chêne, hêtre), mixte<br>
+• Âge estimé des arbres (en demandant au propriétaire ou en regardant les répertoires)<br>
+• Accessibilité : chemin forestier praticable ? Câble existant ?<br>
+• Plan d'aménagement forestier (PAF) existant ?<br>
+• Dégâts (tempête, bostryche, gibier)`
+  },
+  non_agricole: {
+    title: 'Éléments non agricoles (art. 10 al. 3 LDFR)',
+    loi: 'LDFR art. 10 al. 3 · Éléments accessoires non agricoles de l\'entreprise',
+    text: `<p>Selon l'<strong>art. 10 al. 3 LDFR</strong>, les revenus provenant d'éléments non agricoles accessoires sont inclus dans la VR totale, mais capitalisés à leur propre taux (non agricole).</p>
+<p style="margin-top:8px"><strong>Exemples courants :</strong></p>
+<ul style="padding-left:18px;line-height:2;font-size:12px;margin-top:4px">
+  <li>Installations photovoltaïques (PV) sur toiture ou au sol</li>
+  <li>Chauffage à distance vendu aux voisins (PAC, biomasse)</li>
+  <li>Éoliennes agricoles</li>
+  <li>Buvette ou gîte agritouristique</li>
+  <li>Camping à la ferme</li>
+  <li>Vente directe / atelier de transformation (si revenu propre capitalisable)</li>
+</ul>
+<p style="margin-top:8px"><strong>Taux de capitalisation :</strong> Selon le type et le risque, généralement <strong>5% à 8%</strong>. Pour les installations PV avec contrat RIC garanti, un taux de 5–6% est courant.</p>
+<p style="margin-top:8px;background:#fef9c3;padding:8px;border-radius:4px;font-size:12px"><strong>Impact sur la charge maximale (art. 73 LDFR) :</strong> Ces éléments sont repris dans la CM à leur valeur de rendement, sans la majoration de 35%.</p>`,
+    visite: `<strong>À identifier sur place :</strong><br>
+• Puissance PV installée (kWc) et contrat de rachat (durée, prix RIC)<br>
+• Revenus annuels effectifs ou prévisionnels de chaque élément<br>
+• Durée restante de la concession ou contrat<br>
+• L'installation appartient-elle à l'exploitation ou est-elle louée/en leasing ?<br>
+• Permis et autorisations en vigueur`
+  },
+  charge_maximale: {
+    title: 'Charge maximale hypothécaire (art. 73–76 LDFR)',
+    loi: 'LDFR art. 73 al. 1 · Charge maximale admissible sur l\'entreprise agricole',
+    text: `<p>La <strong>charge maximale</strong> est la limite légale du montant total des hypothèques pouvant grever une entreprise agricole. Elle sert de plafond aux garanties bancaires.</p>
+<p style="margin-top:8px"><strong>Formule légale (art. 73 al. 1 LDFR) :</strong></p>
+<div style="background:#f3f4f6;padding:12px;border-radius:6px;font-size:12px;margin:10px 0;line-height:2">
+  VR totale<br>
+  <span style="padding-left:20px">− autres logements (non agr.)</span><br>
+  <span style="padding-left:20px">− éléments non agricoles</span><br>
+  <span style="padding-left:20px">= <strong>VR purement agricole</strong></span><br>
+  <br>
+  CM = VR purement agricole × <strong>1.35</strong><br>
+  <span style="padding-left:20px">+ autres logements</span><br>
+  <span style="padding-left:20px">+ éléments non agricoles</span>
+</div>
+<p style="font-size:12px;color:#555">La part <em>agricole</em> (sol + logement CE + bâtiments agricoles) est majorée de <strong>35%</strong>. Les éléments non agricoles sont repris à leur VR sans majoration.</p>
+<p style="margin-top:8px;background:#fef9c3;padding:8px;border-radius:4px;font-size:12px"><strong>Usage pratique :</strong> La banque cantonale agricole utilise la CM comme base du crédit hypothécaire agricole. Si les dettes actuelles dépassent la CM, un plan d'assainissement est requis (art. 74 LDFR).</p>`,
+    visite: `<strong>Informations à collecter :</strong><br>
+• Montant total des hypothèques actuelles (registre foncier)<br>
+• Cédule hypothécaire ou droit de gage : montant et créancier<br>
+• Lettres de gage en cours<br>
+• Extrait du registre des poursuites (requis pour expertise officielle)<br>
+• Banque(s) créancière(s) et conditions actuelles`
+  }
+};
+
+function showHelp(topic) {
+  const t = HELP_TOPICS[topic];
+  if (!t) return;
+  document.getElementById('help-title').textContent = t.title;
+  document.getElementById('help-loi').textContent = t.loi;
+  document.getElementById('help-text').innerHTML = t.text;
+  const visitSection = document.getElementById('help-visite-section');
+  const visitEl = document.getElementById('help-visite');
+  if (t.visite) {
+    visitSection.style.display = 'block';
+    visitEl.innerHTML = t.visite;
+  } else {
+    visitSection.style.display = 'none';
+  }
+  document.getElementById('help-drawer').classList.add('open');
+  document.getElementById('help-overlay').classList.add('open');
+  document.getElementById('help-drawer').scrollTop = 0;
+}
+
+function closeHelp() {
+  document.getElementById('help-drawer').classList.remove('open');
+  document.getElementById('help-overlay').classList.remove('open');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date
+  document.getElementById('estimationDate').value = new Date().toISOString().split('T')[0];
+
+  // Init with one parcel
+  addParcel();
+
+  // Init logement calculation
+  calcLogement();
+
+  // Init autres
+  renderOtherElements();
+
+  updateStepUI();
+});
+</script>
+</body>
+</html>
