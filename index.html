@@ -291,10 +291,35 @@
       Ajouter une surface
     </button>
 
-    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-      <div class="flex justify-between items-center">
-        <span class="text-sm font-semibold text-gray-700">Total VR surfaces agricoles :</span>
-        <span class="text-lg font-bold text-green-800" id="total-vr-sol">CHF 0</span>
+    <!-- ── Cultures spéciales ── -->
+    <div class="mt-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full text-white flex items-center justify-center text-xs font-bold" style="background:#7c3aed">V</span>
+        Cultures spéciales
+        <button type="button" class="help-btn" onclick="showHelp('cultures_speciales')">?</button>
+      </h3>
+      <div class="rounded-lg p-3 mb-3 text-xs" style="background:#f5f3ff;border:1px solid #ddd6fe;color:#5b21b6">
+        Viticulture (vignes AOC), arboriculture, maraîchage, horticulture — évalués par capitalisation du fermage de référence au taux de <strong>4.24%</strong>. La valeur locative est le fermage moyen constaté dans la région pour ce type de culture.
+      </div>
+      <div id="cultures-speciales-container"></div>
+      <button onclick="addCultureSpeciale()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter une culture spéciale
+      </button>
+    </div>
+
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg space-y-2">
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">VR surfaces agricoles (tables ODFR) :</span>
+        <span class="font-medium text-gray-800" id="total-vr-sol">CHF 0</span>
+      </div>
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">VR cultures spéciales :</span>
+        <span class="font-medium text-gray-800" id="total-vr-cultures">CHF 0</span>
+      </div>
+      <div class="flex justify-between items-center border-t pt-2">
+        <span class="font-semibold text-gray-700">Total VR Sol :</span>
+        <span class="text-lg font-bold text-green-800" id="total-vr-sol-global">CHF 0</span>
       </div>
     </div>
 
@@ -418,11 +443,32 @@
   </div>
 </div>
 
-<!-- ============ STEP 4: AUTRES ÉLÉMENTS ============ -->
+<!-- ============ STEP 4: CORRECTIONS & AUTRES ÉLÉMENTS ============ -->
 <div id="step-4" class="step-content hidden">
   <div class="card p-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-1">Autres éléments</h2>
-    <p class="text-sm text-gray-500 mb-3">Renseignez les forêts et les éléments non agricoles éventuels.</p>
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Corrections & Autres éléments</h2>
+    <p class="text-sm text-gray-500 mb-3">Plus-values, moins-values, forêts et éléments non agricoles.</p>
+
+    <!-- ── Plus-values / Moins-values ── -->
+    <div class="mb-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold">±</span>
+        Plus-values et moins-values
+        <button type="button" class="help-btn" onclick="showHelp('plus_moins_values')">?</button>
+      </h3>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-xs text-amber-800">
+        Ajustements explicites autorisés par le Guide ODFR : <strong>investissements récents exceptionnels sur bâtiments</strong>, servitudes pénalisantes, droits de production, réparations urgentes à court terme, état exceptionnel. Chaque correction est justifiée dans le rapport et <strong>modifie directement le total VR</strong> (inclus dans la base agricole × 1.35 pour la charge maximale).
+      </div>
+      <div id="plus-minus-container"></div>
+      <button onclick="addPlusMinusValue()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter une correction
+      </button>
+      <div class="mt-3 p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+        <span class="text-sm font-medium text-gray-600">Solde corrections (+ / –) :</span>
+        <span class="text-base font-bold" id="total-plus-minus" style="color:#92400e">CHF 0</span>
+      </div>
+    </div>
 
     <details class="step-guide bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
       <summary>🌲 Guide de l'étape — Forêts et éléments non agricoles</summary>
@@ -484,6 +530,10 @@
     </div>
 
     <div class="mt-6 p-4 bg-gray-50 rounded-lg space-y-2">
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-600">Solde corrections (plus/moins-values) :</span>
+        <span class="font-medium" id="sum-plus-minus">CHF 0</span>
+      </div>
       <div class="flex justify-between items-center text-sm">
         <span class="text-gray-600">VR Forêts :</span>
         <span class="font-medium" id="sum-foret">CHF 0</span>
@@ -691,10 +741,14 @@ let parcels = [];
 let buildings = [];
 let otherLogements = [];
 let otherElements = [];
+let culturesSpeciales = [];
+let plusMinusValues = [];
 let parcelCounter = 0;
 let buildingCounter = 0;
 let logementCounter = 0;
 let elementCounter = 0;
+let cultureCounter = 0;
+let plusMinusCounter = 0;
 
 // ============================================================
 // NAVIGATION
@@ -911,7 +965,216 @@ function calcAllSol() {
     if (el) el.textContent = fmtCHF(p.vr);
     total += p.vr;
   });
-  document.getElementById('total-vr-sol').textContent = fmtCHF(total);
+  const solEl = document.getElementById('total-vr-sol');
+  if (solEl) solEl.textContent = fmtCHF(total);
+  updateSolGlobalTotal();
+}
+
+function updateSolGlobalTotal() {
+  const vrSol = parcels.reduce((s,p) => s + p.vr, 0);
+  const vrCult = culturesSpeciales.reduce((s,c) => s + c.vr, 0);
+  const cultEl = document.getElementById('total-vr-cultures');
+  const globEl = document.getElementById('total-vr-sol-global');
+  if (cultEl) cultEl.textContent = fmtCHF(vrCult);
+  if (globEl) globEl.textContent = fmtCHF(vrSol + vrCult);
+}
+
+// ============================================================
+// CULTURES SPÉCIALES (vignes, arboriculture, maraîchage…)
+// ============================================================
+const CULTURE_TYPES = {
+  vignes_aoc:     'Vignes AOC',
+  vignes_table:   'Vignes de table',
+  arboriculture:  'Arboriculture',
+  maraichage:     'Maraîchage',
+  horticulture:   'Horticulture',
+  autre_culture:  'Autre culture spéciale'
+};
+
+function addCultureSpeciale() {
+  const id = ++cultureCounter;
+  culturesSpeciales.push({id, type: 'vignes_aoc', description: '', surface: 0, fermage: 0, vr: 0});
+  renderCulturesSpeciales();
+}
+
+function removeCultureSpeciale(id) {
+  culturesSpeciales = culturesSpeciales.filter(c => c.id !== id);
+  renderCulturesSpeciales();
+  updateSolGlobalTotal();
+}
+
+function renderCulturesSpeciales() {
+  const c = document.getElementById('cultures-speciales-container');
+  if (!c) return;
+  if (culturesSpeciales.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-1">Aucune culture spéciale. Cliquez sur "Ajouter" si applicable.</p>';
+    updateSolGlobalTotal();
+    return;
+  }
+  c.innerHTML = culturesSpeciales.map((cs, idx) => `
+    <div class="border rounded-lg p-4 mb-3 bg-white" style="border-left:4px solid #7c3aed">
+      <div class="flex justify-between items-start mb-3">
+        <h4 class="font-semibold text-gray-700 text-sm">Culture spéciale ${idx + 1}${cs.description ? ' – ' + cs.description : ''}</h4>
+        <button onclick="removeCultureSpeciale(${cs.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Type de culture</label>
+          <select onchange="updateCultureSpeciale(${cs.id},'type',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            ${Object.entries(CULTURE_TYPES).map(([k,v]) => `<option value="${k}" ${cs.type===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description (appellation, lieu-dit…)</label>
+          <input type="text" value="${cs.description}" placeholder="Ex. Chasselas Lavaux AOC, parcelle Les Cailloux"
+            onchange="updateCultureSpeciale(${cs.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Surface (ha)</label>
+          <input type="number" value="${cs.surface}" min="0" step="0.01"
+            onchange="updateCultureSpeciale(${cs.id},'surface',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Fermage de référence (CHF/ha/an) <button type="button" class="help-btn" onclick="showHelp('cultures_speciales')">?</button></label>
+          <input type="number" value="${cs.fermage}" min="0" step="50"
+            onchange="updateCultureSpeciale(${cs.id},'fermage',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">VR (fermage ÷ 4.24%)</label>
+          <div class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm bg-gray-50 font-bold text-green-800" id="vr-culture-${cs.id}">${fmtCHF(cs.vr)}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  updateSolGlobalTotal();
+}
+
+function updateCultureSpeciale(id, field, value) {
+  const cs = culturesSpeciales.find(c => c.id === id);
+  if (!cs) return;
+  cs[field] = value;
+  cs.vr = cs.surface * cs.fermage / CAP_RATE_LOG; // CAP_RATE_LOG = 4.24%
+  const el = document.getElementById(`vr-culture-${cs.id}`);
+  if (el) el.textContent = fmtCHF(cs.vr);
+  updateSolGlobalTotal();
+}
+
+// ============================================================
+// PLUS-VALUES ET MOINS-VALUES
+// ============================================================
+const PLUS_MINUS_MOTIFS = {
+  investissement_batiment:  'Investissement récent sur bâtiments (amélioration DUR/capacité)',
+  etat_exceptionnel:        'État exceptionnel des bâtiments (au-delà des tables standard)',
+  reparations_urgentes:     'Réparations urgentes nécessaires à court terme',
+  servitude_penalisante:    'Servitude pénalisante (droit de passage, restriction)',
+  droits_production:        'Droits ou quotas de production',
+  plus_value_sol:           'Plus-value sur surfaces (amélioration, drainage, irrigation)',
+  moins_value_sol:          'Moins-value sur surfaces (pollution, inondabilité, zone rouge)',
+  autre_plus:               'Autre plus-value',
+  autre_moins:              'Autre moins-value'
+};
+
+function addPlusMinusValue() {
+  const id = ++plusMinusCounter;
+  plusMinusValues.push({id, description: '', motif: 'investissement_batiment', sens: 'plus', montant: 0});
+  renderPlusMinusValues();
+}
+
+function removePlusMinusValue(id) {
+  plusMinusValues = plusMinusValues.filter(v => v.id !== id);
+  renderPlusMinusValues();
+  updatePlusMinusTotals();
+}
+
+function renderPlusMinusValues() {
+  const c = document.getElementById('plus-minus-container');
+  if (!c) return;
+  if (plusMinusValues.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-1">Aucune correction. Cliquez sur "Ajouter" si applicable.</p>';
+    updatePlusMinusTotals();
+    return;
+  }
+  c.innerHTML = plusMinusValues.map((v, idx) => {
+    const signedMontant = v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant);
+    const color = v.sens === 'plus' ? '#166534' : '#991b1b';
+    return `
+    <div class="border rounded-lg p-4 mb-3 bg-white" style="border-left:4px solid ${v.sens==='plus'?'#16a34a':'#dc2626'}">
+      <div class="flex justify-between items-start mb-3">
+        <h4 class="font-semibold text-gray-700 text-sm">
+          <span style="color:${color};font-size:15px;font-weight:900">${v.sens==='plus'?'+':'–'}</span>
+          Correction ${idx + 1}${v.description ? ' – ' + v.description : ''}
+        </h4>
+        <button onclick="removePlusMinusValue(${v.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Motif</label>
+          <select onchange="updatePlusMinusValue(${v.id},'motif',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            ${Object.entries(PLUS_MINUS_MOTIFS).map(([k,lbl]) => `<option value="${k}" ${v.motif===k?'selected':''}>${lbl}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description / justification</label>
+          <input type="text" value="${v.description}" placeholder="Ex. Rénovation complète stabulation 2022 — CHF 380 000 investis"
+            onchange="updatePlusMinusValue(${v.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Sens</label>
+          <select onchange="updatePlusMinusValue(${v.id},'sens',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="plus" ${v.sens==='plus'?'selected':''}>+ Plus-value (augmente la VR)</option>
+            <option value="moins" ${v.sens==='moins'?'selected':''}>– Moins-value (réduit la VR)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Montant CHF (valeur absolue)</label>
+          <input type="number" value="${v.montant}" min="0" step="1000"
+            onchange="updatePlusMinusValue(${v.id},'montant',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-2 p-2 rounded flex justify-between items-center" style="background:${v.sens==='plus'?'#f0fdf4':'#fef2f2'}">
+        <span class="text-xs text-gray-500">Impact sur VR total :</span>
+        <span class="font-bold text-sm" style="color:${color}">${v.sens==='plus'?'+':'–'} ${Math.round(v.montant).toLocaleString('fr-CH')} CHF</span>
+      </div>
+    </div>`;
+  }).join('');
+  updatePlusMinusTotals();
+}
+
+function updatePlusMinusValue(id, field, value) {
+  const v = plusMinusValues.find(x => x.id === id);
+  if (!v) return;
+  v[field] = value;
+  // Recalculate signed montant
+  v.signedMontant = v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant);
+  renderPlusMinusValues();
+  updatePlusMinusTotals();
+}
+
+function updatePlusMinusTotals() {
+  const net = plusMinusValues.reduce((s,v) => s + (v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant)), 0);
+  const el1 = document.getElementById('total-plus-minus');
+  const el2 = document.getElementById('sum-plus-minus');
+  const color = net >= 0 ? '#166534' : '#991b1b';
+  const sign = net >= 0 ? '+' : '';
+  if (el1) { el1.textContent = sign + fmtCHF(net); el1.style.color = color; }
+  if (el2) { el2.textContent = sign + fmtCHF(net); el2.style.color = color; }
+  // Update step 4 total
+  const foretSurface = parseFloat(document.getElementById('foret-surface')?.value) || 0;
+  const foretVrHa = parseFloat(document.getElementById('foret-vr-ha')?.value) || 0;
+  const foret = foretSurface * foretVrHa;
+  const nonAgri = otherElements.reduce((s,e) => s + e.vr, 0);
+  const total = net + foret + nonAgri;
+  const totalEl = document.getElementById('total-vr-autres');
+  if (totalEl) totalEl.textContent = fmtCHF(total);
 }
 
 // ============================================================
@@ -1075,11 +1338,13 @@ function calcAutres() {
   document.getElementById('foret-vr-total').textContent = fmtCHF(foretTotal);
 
   const nonAgri = otherElements.reduce((s,e) => s + e.vr, 0);
-  const total = foretTotal + nonAgri;
+  const plusMinus = plusMinusValues.reduce((s,v) => s + (v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant)), 0);
+  const total = plusMinus + foretTotal + nonAgri;
 
   document.getElementById('sum-foret').textContent = fmtCHF(foretTotal);
   document.getElementById('sum-non-agri').textContent = fmtCHF(nonAgri);
   document.getElementById('total-vr-autres').textContent = fmtCHF(total);
+  updatePlusMinusTotals();
 }
 
 function addOtherElement() {
@@ -1141,22 +1406,26 @@ function updateOtherEl(id, field, value) {
 // ============================================================
 function getGrandTotal() {
   const vrSol = parcels.reduce((s,p) => s + p.vr, 0);
+  const vrCulturesSpeciales = culturesSpeciales.reduce((s,c) => s + c.vr, 0);
   const logCE = getLogCEVR();
   const logOther = otherLogements.reduce((s,l) => s + l.vr, 0);
   const batiments = buildings.reduce((s,b) => s + b.vr, 0);
   const foret = (parseFloat(document.getElementById('foret-surface')?.value) || 0) *
                 (parseFloat(document.getElementById('foret-vr-ha')?.value) || 0);
   const nonAgri = otherElements.reduce((s,e) => s + e.vr, 0);
-  const total = vrSol + logCE + logOther + batiments + foret + nonAgri;
+  // Plus-values et moins-values : font partie de la base agricole (CHF)
+  const plusMinusNet = plusMinusValues.reduce((s,v) => s + (v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant)), 0);
+
+  const total = vrSol + vrCulturesSpeciales + logCE + logOther + batiments + foret + nonAgri + plusMinusNet;
 
   // Charge maximale (art. 73 LDFR) :
-  // La base agricole (hors autres logements et éléments non agricoles) est augmentée de 35%.
-  // Les autres logements et éléments non agricoles sont ajoutés au résultat sans majoration.
+  // Base agricole = tout sauf autres logements et éléments non agricoles (art. 10 al. 3).
+  // Les plus/moins-values s'appliquent sur des éléments agricoles → incluses dans la base × 1.35.
   const vrPurementAgricole = total - logOther - nonAgri;
   const chargeMaximale = Math.round(vrPurementAgricole * 1.35 + logOther + nonAgri);
 
-  return {vrSol, logCE, logOther, batiments, foret, nonAgri, total, chargeMaximale,
-    vrPurementAgricole};
+  return {vrSol, vrCulturesSpeciales, logCE, logOther, batiments, foret, nonAgri,
+    plusMinusNet, total, chargeMaximale, vrPurementAgricole};
 }
 
 function updateResults() {
@@ -1166,12 +1435,14 @@ function updateResults() {
 
   const rows = [
     {label: 'Surfaces agricoles (sol)', value: r.vrSol, detail: `${parcels.length} surface(s)`},
+    {label: 'Cultures spéciales (vignes, arbori., maraîchage)', value: r.vrCulturesSpeciales, detail: `${culturesSpeciales.length} culture(s) — capitalisation fermage ÷ 4.24%`},
     {label: 'Logement chef d\'exploitation', value: r.logCE, detail: `${document.getElementById('log-ul')?.value||0} UL × ${document.getElementById('log-points')?.value||0} pts`},
     {label: 'Autres logements', value: r.logOther, detail: `${otherLogements.length} logement(s) — valeur non agricole`},
     {label: 'Bâtiments d\'exploitation', value: r.batiments, detail: `${buildings.length} bâtiment(s)`},
     {label: 'Forêts', value: r.foret, detail: `${document.getElementById('foret-surface')?.value||0} ha`},
     {label: 'Éléments non agricoles', value: r.nonAgri, detail: `${otherElements.length} élément(s) — art. 10 al. 3 LDFR`},
-  ].filter(row => row.value > 0);
+    {label: 'Corrections (plus/moins-values)', value: r.plusMinusNet, detail: `${plusMinusValues.length} correction(s) — base agricole`, signed: true},
+  ].filter(row => row.value !== 0);
 
   const totalPct = r.total > 0 ? (v) => Math.round(v/r.total*100) : () => 0;
 
@@ -1363,8 +1634,28 @@ function generateReport(type) {
           <td style="text-align:right">${Math.round(p.vr).toLocaleString('fr-CH')}</td>
         </tr>`;
       }).join('')}
-      <tr class="total-row"><td colspan="7"><strong>Total VR Surfaces agricoles</strong></td><td style="text-align:right"><strong>${Math.round(r.vrSol).toLocaleString('fr-CH')}</strong></td></tr>
-    </table>` : '<p style="color:#888;font-size:10pt;">Aucune surface saisie.</p>'}
+      <tr class="total-row"><td colspan="7"><strong>Sous-total surfaces agricoles (tables ODFR)</strong></td><td style="text-align:right"><strong>${Math.round(r.vrSol).toLocaleString('fr-CH')}</strong></td></tr>
+    </table>` : '<p style="color:#888;font-size:10pt;">Aucune surface agricole saisie.</p>'}
+
+    ${culturesSpeciales.length > 0 ? `
+    <h3>Cultures spéciales (viticulture, arboriculture, maraîchage)</h3>
+    <table>
+      <tr><th>Type</th><th>Description</th><th>Surface (ha)</th><th>Fermage réf. (CHF/ha/an)</th><th>Taux capi.</th><th style="text-align:right">VR (CHF)</th></tr>
+      ${culturesSpeciales.map(cs => `<tr>
+        <td>${CULTURE_TYPES[cs.type]||cs.type}</td>
+        <td>${cs.description||'–'}</td>
+        <td>${cs.surface.toFixed(2)}</td>
+        <td>${cs.fermage.toLocaleString('fr-CH')}</td>
+        <td>4.24%</td>
+        <td style="text-align:right">${Math.round(cs.vr).toLocaleString('fr-CH')}</td>
+      </tr>`).join('')}
+      <tr class="total-row"><td colspan="5"><strong>Sous-total cultures spéciales</strong></td><td style="text-align:right"><strong>${Math.round(r.vrCulturesSpeciales).toLocaleString('fr-CH')}</strong></td></tr>
+    </table>` : ''}
+
+    ${(r.vrSol + r.vrCulturesSpeciales) > 0 ? `
+    <p style="text-align:right;font-size:10pt;font-weight:bold;color:#2d6a4f;margin:4px 0 0">
+      Total VR Sol : <strong>${Math.round(r.vrSol + r.vrCulturesSpeciales).toLocaleString('fr-CH')}</strong> CHF
+    </p>` : ''}
 
     <h2>4. Bâtiments et logements</h2>
     <h3>A. Logement du chef d'exploitation (évaluation à la valeur agricole)</h3>
@@ -1430,22 +1721,43 @@ function generateReport(type) {
       </tr>`).join('')}
     </table>` : ''}
 
+    ${plusMinusValues.length > 0 ? `
+    <h2>${r.foret > 0 ? '6b' : '6'}. Plus-values et moins-values</h2>
+    <table>
+      <tr><th>Sens</th><th>Motif</th><th>Description / Justification</th><th style="text-align:right">Montant (CHF)</th></tr>
+      ${plusMinusValues.map(v => {
+        const net = v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant);
+        return `<tr>
+          <td style="font-weight:bold;color:${v.sens==='plus'?'#166534':'#991b1b'}">${v.sens === 'plus' ? '+ Plus-value' : '– Moins-value'}</td>
+          <td style="font-size:9pt">${PLUS_MINUS_MOTIFS[v.motif]||v.motif}</td>
+          <td style="font-size:9pt">${v.description||'–'}</td>
+          <td style="text-align:right;font-weight:bold;color:${v.sens==='plus'?'#166534':'#991b1b'}">${net >= 0 ? '+' : ''}${Math.round(net).toLocaleString('fr-CH')}</td>
+        </tr>`;
+      }).join('')}
+      <tr class="total-row">
+        <td colspan="3"><strong>Solde corrections (plus/moins-values)</strong></td>
+        <td style="text-align:right;font-weight:bold;color:${r.plusMinusNet>=0?'#166534':'#991b1b'}">${r.plusMinusNet>=0?'+':''}${Math.round(r.plusMinusNet).toLocaleString('fr-CH')}</td>
+      </tr>
+    </table>` : ''}
+
     <h2>7. Récapitulatif – Détermination de la valeur de rendement</h2>
     <table>
       <tr><th>Composante</th><th style="text-align:right">Valeur locative (CHF)</th><th style="text-align:right">VR (CHF)</th><th style="text-align:right">Part (%)</th></tr>
       ${[
         ['Surfaces agricoles (sol)', 0, r.vrSol],
+        ['Cultures spéciales', 0, r.vrCulturesSpeciales],
         ['Logement chef d\'exploitation', Math.min(parseFloat(data.logUL),14)*parseFloat(data.logPoints)*6.40, r.logCE],
         ['Autres logements (non agr.)', r.logOther > 0 ? otherLogements.reduce((s,l)=>s+l.locative,0) : 0, r.logOther],
         ['Bâtiments d\'exploitation', buildings.reduce((s,b)=>s+b.locative,0), r.batiments],
         ['Forêts', 0, r.foret],
         ['Éléments non agricoles (art. 10 al. 3 LDFR)', otherElements.reduce((s,e)=>s+e.locative,0), r.nonAgri],
-      ].filter(([,l,v]) => v > 0).map(([label, loc, val]) => `
+        ['Corrections (plus/moins-values)', 0, r.plusMinusNet],
+      ].filter(([,l,v]) => v !== 0).map(([label, loc, val]) => `
         <tr>
           <td>${label}</td>
           <td style="text-align:right">${loc > 0 ? Math.round(loc).toLocaleString('fr-CH') : '–'}</td>
-          <td style="text-align:right">${Math.round(val).toLocaleString('fr-CH')}</td>
-          <td style="text-align:right">${r.total>0?Math.round(val/r.total*100):0}%</td>
+          <td style="text-align:right;color:${val < 0 ? '#991b1b' : 'inherit'}">${val < 0 ? '' : ''}${Math.round(val).toLocaleString('fr-CH')}</td>
+          <td style="text-align:right">${r.total>0?Math.round(Math.abs(val)/r.total*100):0}%</td>
         </tr>`).join('')}
       <tr class="grand-total">
         <td><strong>VALEUR DE RENDEMENT TOTALE</strong></td>
@@ -1572,10 +1884,21 @@ async function generateDocx() {
             const typeLabels = {terres_arables:'Terres arables',prairies_fauche:'Prairies fauche',prairies_permanentes:'Prairies perm.',paturages:'Pâturages'};
             return makeRow([p.description||'–', typeLabels[p.type]||p.type, p.surface.toFixed(2), p.zone, p.qualite, Math.round(p.vr).toLocaleString('fr-CH')]);
           }),
-          makeRow(['', '', '', '', 'Total VR Sol', Math.round(r.vrSol).toLocaleString('fr-CH')], false, true),
+          makeRow(['', '', '', '', 'Sous-total surfaces (tables ODFR)', Math.round(r.vrSol).toLocaleString('fr-CH')], false, true),
         ]
       })
     ] : [new Paragraph({children: [new TextRun({text: 'Aucune surface saisie.', italics: true, color: '888888'})]})]),
+    ...(culturesSpeciales.length > 0 ? [
+      new Paragraph({children: [new TextRun({text: 'Cultures spéciales (viticulture, arboriculture, maraîchage)', bold: true, size: 22})], spacing: {before: 200, after: 100}}),
+      new Table({
+        width: {size: 100, type: WidthType.PERCENTAGE},
+        rows: [
+          makeRow(['Type', 'Description', 'Surface (ha)', 'Fermage réf. CHF/ha/an', 'Taux', 'VR (CHF)'], true),
+          ...culturesSpeciales.map(cs => makeRow([CULTURE_TYPES[cs.type]||cs.type, cs.description||'–', cs.surface.toFixed(2), cs.fermage.toLocaleString('fr-CH'), '4.24%', Math.round(cs.vr).toLocaleString('fr-CH')])),
+          makeRow(['','','','','Total cultures spéciales', Math.round(r.vrCulturesSpeciales).toLocaleString('fr-CH')], false, true),
+        ]
+      })
+    ] : []),
 
     new Paragraph({text: '3. Bâtiments', ...h2Style}),
     new Paragraph({children: [new TextRun({text: 'A. Logement du chef d\'exploitation', bold: true, size: 22})], spacing: {before: 150, after: 100}}),
@@ -1603,22 +1926,39 @@ async function generateDocx() {
       })
     ] : []),
 
-    new Paragraph({text: '4. Récapitulatif – Valeur de rendement totale', ...h2Style}),
+    ...(plusMinusValues.length > 0 ? [
+      new Paragraph({text: '4. Plus-values et moins-values', ...h2Style}),
+      new Table({
+        width: {size: 100, type: WidthType.PERCENTAGE},
+        rows: [
+          makeRow(['Sens', 'Motif', 'Description / Justification', 'Montant (CHF)'], true),
+          ...plusMinusValues.map(v => {
+            const net = v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant);
+            return makeRow([v.sens === 'plus' ? '+ Plus-value' : '– Moins-value', PLUS_MINUS_MOTIFS[v.motif]||v.motif, v.description||'–', (net >= 0 ? '+' : '') + Math.round(net).toLocaleString('fr-CH')]);
+          }),
+          makeRow(['', '', 'Solde corrections', (r.plusMinusNet >= 0 ? '+' : '') + Math.round(r.plusMinusNet).toLocaleString('fr-CH')], false, true),
+        ]
+      })
+    ] : []),
+
+    new Paragraph({text: '5. Récapitulatif – Valeur de rendement totale', ...h2Style}),
     new Table({
       width: {size: 100, type: WidthType.PERCENTAGE},
       rows: [
         makeRow(['Composante', 'VR (CHF)', 'Part (%)'], true),
         ...[
           ['Surfaces agricoles (sol)', r.vrSol],
+          ['Cultures spéciales', r.vrCulturesSpeciales],
           ['Logement chef d\'exploitation', r.logCE],
           ['Autres logements (valeur non agricole)', r.logOther],
           ['Bâtiments d\'exploitation', r.batiments],
           ['Forêts', r.foret],
           ['Éléments non agricoles (art. 10 al. 3 LDFR)', r.nonAgri],
-        ].filter(([,v]) => v > 0).map(([label, val]) => makeRow([
+          ['Corrections (plus/moins-values)', r.plusMinusNet],
+        ].filter(([,v]) => v !== 0).map(([label, val]) => makeRow([
           label,
-          Math.round(val).toLocaleString('fr-CH'),
-          (r.total>0?Math.round(val/r.total*100):0)+'%'
+          (val < 0 ? '' : '') + Math.round(val).toLocaleString('fr-CH'),
+          (r.total>0?Math.round(Math.abs(val)/r.total*100):0)+'%'
         ])),
         makeRow(['VALEUR DE RENDEMENT TOTALE', Math.round(r.total).toLocaleString('fr-CH'), '100%'], false, true),
       ]
@@ -1689,7 +2029,10 @@ async function generateDocx() {
 function resetForm() {
   if (!confirm('Effacer toutes les données et commencer une nouvelle estimation ?')) return;
   parcels = []; buildings = []; otherLogements = []; otherElements = [];
+  culturesSpeciales = []; plusMinusValues = [];
   parcelCounter = buildingCounter = logementCounter = elementCounter = 0;
+  cultureCounter = plusMinusCounter = 0;
+  renderCulturesSpeciales(); renderPlusMinusValues();
   document.querySelectorAll('input, select, textarea').forEach(el => {
     if (el.type === 'number') el.value = el.id === 'log-ul' ? '8' : el.id === 'log-points' ? '90' : el.id === 'foret-vr-ha' ? '2000' : '0';
     else if (el.tagName === 'SELECT') el.selectedIndex = 0;
@@ -1706,13 +2049,15 @@ const HELP_TOPICS = {
     title: 'Vue d\'ensemble — Méthode d\'estimation VRA',
     loi: 'LDFR art. 10 · ODFR art. 1–2 · Guide d\'estimation 01.04.2018',
     text: `<p>La <strong>valeur de rendement agricole (VR)</strong> est la valeur légale d'une entreprise agricole, définie comme la capitalisation du revenu moyen à long terme. C'est la seule valeur de référence admise pour les transferts soumis à la LDFR.</p>
-<p style="margin-top:8px"><strong>Les 5 composantes du calcul :</strong></p>
+<p style="margin-top:8px"><strong>Les composantes du calcul :</strong></p>
 <ol style="padding-left:18px;line-height:2.2;margin-top:4px">
-  <li>VR des <strong>surfaces agricoles</strong> (sol) — Étape 2</li>
+  <li>VR des <strong>surfaces agricoles</strong> (sol, tables ODFR) — Étape 2</li>
+  <li>VR des <strong>cultures spéciales</strong> (vignes, arboriculture, maraîchage) — Étape 2</li>
   <li>VR du <strong>logement du chef d'exploitation</strong> (CE) — Étape 3</li>
   <li>VR des <strong>bâtiments d'exploitation</strong> — Étape 3</li>
   <li>VR des <strong>forêts</strong> — Étape 4</li>
   <li><strong>Éléments non agricoles</strong> (art. 10 al. 3 LDFR) — Étape 4</li>
+  <li><strong>Corrections</strong> : plus-values et moins-values explicites — Étape 4</li>
 </ol>
 <p style="margin-top:10px">Le <strong>taux de capitalisation de base</strong> est <span style="font-size:15px;font-weight:bold;color:#2d6a4f">4.24%</span><br>Période de référence : 2009–2024 (ODFR art. 1)</p>
 <p style="margin-top:8px;background:#f0f7f4;padding:8px;border-radius:4px">La <strong>charge maximale</strong> (art. 73 LDFR) = VR agricole × 1.35 + éléments non agricoles. Elle correspond à la limite légale des hypothèques admissibles.</p>`,
@@ -2006,6 +2351,57 @@ En cas de doute, contacter la Commission foncière cantonale.</p>
 • Lettres de gage en cours<br>
 • Extrait du registre des poursuites (requis pour expertise officielle)<br>
 • Banque(s) créancière(s) et conditions actuelles`
+  },
+
+  cultures_speciales: {
+    title: 'Cultures spéciales — méthode de capitalisation',
+    loi: 'Guide fédéral d\'estimation VRA (01.04.2018) § 3.3 · ODFR Annexe fermages',
+    text: `<p>Les <strong>cultures spéciales</strong> (vignes AOC, arboriculture, maraîchage, horticulture) ne figurent pas dans les tables ODFR habituelles. Leur valeur de rendement est calculée par <strong>capitalisation du fermage de référence</strong> :</p>
+<div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:6px;padding:10px;margin:10px 0;text-align:center;font-size:13px">
+  <strong>VR = Surface (ha) × Fermage de référence (CHF/ha/an) ÷ 4.24%</strong>
+</div>
+<p><strong>Fermage de référence :</strong> valeur cantonale fixée annuellement par le Conseil fédéral / cantons (art. 6 LBR). En Vaud, compter typiquement :</p>
+<ul style="padding-left:16px;line-height:2;margin:6px 0">
+  <li>Vignes AOC (Lavaux, La Côte, Chablais) : <strong>3 500 – 6 500 CHF/ha/an</strong></li>
+  <li>Arboriculture fruitière : <strong>1 200 – 2 500 CHF/ha/an</strong></li>
+  <li>Maraîchage/horticulture : <strong>1 000 – 2 000 CHF/ha/an</strong></li>
+</ul>
+<p style="background:#fef9c3;padding:8px;border-radius:4px;margin-top:8px"><strong>Important :</strong> le fermage à saisir est le <em>fermage de référence légal</em> (valeur officielle) et non le loyer contractuel réel. En cas de doute, se référer aux tableaux cantonaux en vigueur.</p>`,
+    visite: `<strong>À vérifier sur place :</strong><br>
+• Type précis de culture et appellation (AOC, IGP, table)<br>
+• Surface exacte selon extrait cadastral<br>
+• État des infrastructures (palissage, irrigation, haies coupe-vent)<br>
+• Âge de la vigne ou des arbres fruitiers (impact sur la durée de vie restante)<br>
+• Existence d'un bail à ferme spécifique pour la culture<br>
+• Fermage cantonal de référence en vigueur pour la zone`
+  },
+
+  plus_moins_values: {
+    title: 'Plus-values et moins-values — corrections explicites',
+    loi: 'Guide fédéral d\'estimation VRA (01.04.2018) § 4 · ODFR art. 7',
+    text: `<p>Le Guide fédéral d'estimation autorise des <strong>corrections explicites en CHF</strong> lorsque la réalité de l'exploitation s'écarte significativement des valeurs standard des tables ODFR.</p>
+<p style="margin-top:8px"><strong>Plus-values typiques (augmentent la VR) :</strong></p>
+<ul style="padding-left:16px;line-height:2;margin:4px 0">
+  <li><strong>Investissements récents exceptionnels</strong> sur bâtiments (rénovation stabulation, salle de traite, silo) — la part non encore reflétée dans le taux de capitalisation habituel</li>
+  <li><strong>État exceptionnel</strong> des bâtiments très au-dessus de la moyenne</li>
+  <li><strong>Droits de production</strong> (contingents laitiers, droits de plantation de vigne)</li>
+  <li><strong>Améliorations foncières</strong> récentes (drainage, irrigation)</li>
+</ul>
+<p style="margin-top:8px"><strong>Moins-values typiques (réduisent la VR) :</strong></p>
+<ul style="padding-left:16px;line-height:2;margin:4px 0">
+  <li><strong>Réparations urgentes</strong> à court terme (toiture, structure portante)</li>
+  <li><strong>Servitudes pénalisantes</strong> (ligne électrique, droit de passage contraignant)</li>
+  <li><strong>Pollution ou contamination</strong> du sol</li>
+  <li><strong>Situation en zone rouge</strong> (danger naturel, inondabilité)</li>
+</ul>
+<p style="margin-top:10px;background:#fef9c3;padding:8px;border-radius:4px"><strong>Ces corrections font partie de la base agricole</strong> : elles sont comprises dans le VR agricole total × 1.35 pour le calcul de la charge maximale (art. 73 LDFR). Elles doivent être clairement justifiées et documentées dans le rapport.</p>`,
+    visite: `<strong>À documenter lors de la visite :</strong><br>
+• Photos et devis / factures des investissements récents importants<br>
+• État objectif des bâtiments par rapport aux tables standard<br>
+• Extrait RF pour les servitudes inscrites<br>
+• Rapport d'inspection pour éventuels vices structurels<br>
+• Quotas/contingents (attestation officielle)<br>
+• Toute restriction d'usage ou zone de danger (plan de zone, carte des dangers)`
   }
 };
 
