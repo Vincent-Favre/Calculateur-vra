@@ -958,6 +958,22 @@ let logementCounter = 0;
 let elementCounter = 0;
 let cultureCounter = 0;
 let plusMinusCounter = 0;
+let alpageCounter = 0;
+let zabCounter = 0;
+let energieCounter = 0;
+let servitudeCounter = 0;
+let annotationCounter = 0;
+let ddpCounter = 0;
+let hypothequeCounter = 0;
+let photoCounter = 0;
+let alpages = [];
+let parcellesZAB = [];
+let installationsEnergie = [];
+let servitudes = [];
+let annotations = [];
+let ddps = [];
+let hypotheques = [];
+let photos = [];
 
 // ============================================================
 // NAVIGATION
@@ -2306,7 +2322,9 @@ function resetForm() {
   parcels = []; buildings = []; otherLogements = []; otherElements = [];
   culturesSpeciales = []; plusMinusValues = [];
   parcelCounter = buildingCounter = logementCounter = elementCounter = 0;
-  cultureCounter = plusMinusCounter = 0;
+  cultureCounter = plusMinusCounter = alpageCounter = zabCounter = energieCounter = servitudeCounter = annotationCounter = ddpCounter = hypothequeCounter = photoCounter = 0;
+  alpages = []; parcellesZAB = []; installationsEnergie = [];
+  servitudes = []; annotations = []; ddps = []; hypotheques = []; photos = [];
   renderCulturesSpeciales(); renderPlusMinusValues();
   document.querySelectorAll('input, select, textarea').forEach(el => {
     if (el.type === 'number') el.value = el.id === 'log-ul' ? '8' : el.id === 'log-points' ? '90' : el.id === 'foret-vr-ha' ? '2000' : '0';
@@ -2749,7 +2767,7 @@ function renderAlpages() {
   const c = document.getElementById('alpages-container');
   if (!c) return;
   if (alpages.length === 0) {
-    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucun droit d'alpage saisi.</p>';
+    c.innerHTML = "<p class='text-xs text-gray-400 italic py-2'>Aucun droit d'alpage saisi.</p>";
     return;
   }
   c.innerHTML = alpages.map(a => `
