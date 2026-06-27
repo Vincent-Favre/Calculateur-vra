@@ -203,7 +203,7 @@
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Raison de l'estimation <span class="text-red-500">*</span></label>
-        <select id="raisonEstimation" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <select id="raisonEstimation" onchange="updateLegalAlerts()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
           <option value="remise_famille">Remise de l'exploitation dans la famille</option>
           <option value="remise_tiers">Remise à un tiers (hors famille)</option>
           <option value="garantie_hypothecaire">Garantie hypothécaire / Crédit agricole</option>
@@ -798,6 +798,48 @@
 
   <!-- Actions rapport -->
   <div class="card p-8 mb-6 no-print">
+
+    <!-- ── Alertes contextuelles selon raison ── -->
+    <div id="legal-alerts-box" class="mt-6 hidden"></div>
+
+    <!-- ── Conclusion structurée ── -->
+    <div class="card p-6 mt-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-1">Conclusion de l'estimation</h2>
+      <p class="text-sm text-gray-500 mb-4">Ces trois champs constituent la conclusion formelle du rapport. Ils sont obligatoires et apparaissent tels quels dans le document livré au client.</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            1. Synthèse de la valeur de rendement
+            <span class="text-xs font-normal text-gray-400 ml-2">Résumé chiffré et légal</span>
+          </label>
+          <textarea id="conclusion-synthese" rows="4"
+            placeholder="Ex. La valeur de rendement de l'entreprise agricole sise à [commune], comprenant [X ha SAU], [N bâtiments] et [logement CE], s'établit à CHF [...] au [date]. Ce montant est calculé conformément à la LDFR et à l'ODFR, sur la base du taux de capitalisation de 4.24% (période 2009–2024)."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            2. Éléments qualitatifs & observations déterminantes
+            <span class="text-xs font-normal text-gray-400 ml-2">Points ayant influencé la valeur</span>
+          </label>
+          <textarea id="conclusion-qualitatif" rows="4"
+            placeholder="Ex. L'exploitation présente un potentiel agronomique bon à très bon (sols profonds, bonne accessibilité). La stabulation, bien que surdimensionnée, a été valorisée à sa pleine capacité locative. Les servitudes de passage inscrites au RF n'ont pas d'impact significatif sur la valeur. La surface en ZAB (parcelle 1234) est hors périmètre LDFR."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            3. Réserves &amp; conditions de validité
+            <span class="text-xs font-normal text-gray-400 ml-2">Limites et mise en garde</span>
+          </label>
+          <textarea id="conclusion-reserves" rows="3"
+            placeholder="Ex. La présente estimation est valable 12 mois à compter de la date du rapport. Elle est établie sur la base des informations fournies par le mandant et des éléments constatés lors de la visite du [date]. L'estimateur décline toute responsabilité en cas d'informations inexactes ou d'éléments non communiqués (servitudes non inscrites, pollutions, etc.)."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+        </div>
+      </div>
+    </div>
+
     <h2 class="text-xl font-bold text-gray-800 mb-2">Générer le rapport</h2>
     <p class="text-sm text-gray-500 mb-6">Le rapport est destiné au client de Terre à Terre. Il présente le détail complet de l'estimation conforme à la LDFR/ODFR.</p>
 
@@ -1003,7 +1045,7 @@ function updateStepUI() {
     }
   }
 
-  if (currentStep === 7) updateResults();
+  if (currentStep === 7) { updateResults(); updateLegalAlerts(); updateHypothequeTotal(); }
 }
 
 function goToStep(n) { currentStep = n; updateStepUI(); window.scrollTo(0,0); }
@@ -1726,12 +1768,14 @@ function updateResults() {
 
   const rows = [
     {label: 'Surfaces agricoles (sol)', value: r.vrSol, detail: `${parcels.length} surface(s)`},
+    {label: "Droits d'alpage / estivage", value: r.vrAlpages, detail: `${alpages.length} droit(s)`},
     {label: 'Cultures spéciales (vignes, arbori., maraîchage)', value: r.vrCulturesSpeciales, detail: `${culturesSpeciales.length} culture(s) — capitalisation fermage ÷ 4.24%`},
     {label: 'Logement chef d\'exploitation', value: r.logCE, detail: `${document.getElementById('log-ul')?.value||0} UL × ${document.getElementById('log-points')?.value||0} pts`},
     {label: 'Autres logements', value: r.logOther, detail: `${otherLogements.length} logement(s) — valeur non agricole`},
     {label: 'Bâtiments d\'exploitation', value: r.batiments, detail: `${buildings.length} bâtiment(s)`},
     {label: 'Forêts', value: r.foret, detail: `${document.getElementById('foret-surface')?.value||0} ha`},
     {label: 'Éléments non agricoles', value: r.nonAgri, detail: `${otherElements.length} élément(s) — art. 10 al. 3 LDFR`},
+    {label: 'Énergie / PV (art. 10 al. 3, non agr.)', value: r.vrEnergie, detail: `${installationsEnergie.length} installation(s)`},
     {label: 'Corrections (plus/moins-values)', value: r.plusMinusNet, detail: `${plusMinusValues.length} correction(s) — base agricole`, signed: true},
   ].filter(row => row.value !== 0);
 
@@ -1755,6 +1799,10 @@ function updateResults() {
       <div class="w-32"></div><div class="w-8"></div>
       <div class="w-32 text-right font-bold text-green-800 text-lg">${fmtCHF(r.total)}</div>
     </div>
+    ${r.vrZAB > 0 ? `<div class="flex items-center gap-4 py-3 mt-1 rounded-lg px-3" style="background:#fff7ed">
+      <div class="flex-1"><div class="text-sm font-semibold text-orange-800">Surfaces ZAB (hors VRA · valeur vénale)</div>
+      <div class="text-xs text-orange-600">Exclues du périmètre LDFR — valorisées séparément</div></div>
+      <div class="w-32 text-right font-bold text-orange-800">${fmtCHF(r.vrZAB)}</div></div>` : ''}
     <div class="flex items-center gap-4 py-3 mt-1 bg-amber-50 rounded-lg px-3">
       <div class="flex-1">
         <div class="text-sm font-semibold text-amber-900">Charge maximale (art. 73 LDFR)</div>
@@ -1790,6 +1838,9 @@ function getFormData() {
     foretSurface: document.getElementById('foret-surface')?.value || '0',
     foretVrHa: document.getElementById('foret-vr-ha')?.value || '0',
     foretRemarques: document.getElementById('foret-remarques')?.value || '',
+    conclusionSynthese: document.getElementById('conclusion-synthese')?.value || '',
+    conclusionQualitatif: document.getElementById('conclusion-qualitatif')?.value || '',
+    conclusionReserves: document.getElementById('conclusion-reserves')?.value || '',
     logUL: document.getElementById('log-ul')?.value || '0',
     logPoints: document.getElementById('log-points')?.value || '0',
   };
@@ -1915,13 +1966,13 @@ function generateReport(type) {
         const typeLabels = {terres_arables:'Terres arables',prairies_fauche:'Prairies fauche',prairies_permanentes:'Prairies perm.',paturages:'Pâturages'};
         const zoneLabels = {'A1A2B1B2':'A1/A2','A3B3A6':'A3/B3','A4A5B4B5':'A4/A5','B6':'B6','C1-4':'C1-4','C5-6':'C5-6','D1-6':'D1-6','F':'F','G':'G'};
         return `<tr>
-          <td>${p.description || '–'}</td>
+          <td>${p.description || '–'}${p.parcelNo?' <span style=\"color:#888;font-size:9pt\">(n°'+p.parcelNo+')</span>':''}</td>
           <td>${typeLabels[p.type]||p.type}</td>
           <td>${p.surface.toFixed(2)}</td>
           <td>${zoneLabels[p.zone]||p.zone}</td>
           <td>${p.qualite.charAt(0).toUpperCase()+p.qualite.slice(1)}</td>
           <td>${p.accessibilite}</td>
-          <td style="font-size:9pt">${corrText}</td>
+          <td style="font-size:9pt">${corrText}${p.affermee?' · <em>affermée</em>':''}${p.commentaire?'<br><span style=\"color:#666\">' + p.commentaire + '</span>':''}</td>
           <td style="text-align:right">${Math.round(p.vr).toLocaleString('fr-CH')}</td>
         </tr>`;
       }).join('')}
@@ -1947,6 +1998,50 @@ function generateReport(type) {
     <p style="text-align:right;font-size:10pt;font-weight:bold;color:#2d6a4f;margin:4px 0 0">
       Total VR Sol : <strong>${Math.round(r.vrSol + r.vrCulturesSpeciales).toLocaleString('fr-CH')}</strong> CHF
     </p>` : ''}
+
+    \${alpages.length > 0 ? \`
+    <h3>Droits d'alpage / surfaces d'estivage</h3>
+    <table>
+      <tr><th>Description</th><th>UGB estivées</th><th>Fermage/UGB (CHF/an)</th><th>Taux cap.</th><th style="text-align:right">VR (CHF)</th></tr>
+      \${alpages.map(a => \`<tr>
+        <td>\${a.description||'–'}</td>
+        <td>\${a.ugb}</td>
+        <td>\${a.fermageHa.toLocaleString('fr-CH')}</td>
+        <td>4.24%</td>
+        <td style="text-align:right">\${a.vr.toLocaleString('fr-CH')}</td>
+      </tr>\`).join('')}
+      <tr class="total-row"><td colspan="4"><strong>Sous-total droits d'alpage</strong></td><td style="text-align:right"><strong>\${r.vrAlpages.toLocaleString('fr-CH')}</strong></td></tr>
+    </table>\` : ''}
+
+    \${installationsEnergie.length > 0 ? \`
+    <h3>Installations de production d'énergie (art. 10 al. 3 LDFR)</h3>
+    <table>
+      <tr><th>Description</th><th>Revenu net/an (CHF)</th><th>Taux cap.</th><th style="text-align:right">VR (CHF)</th></tr>
+      \${installationsEnergie.map(e => \`<tr>
+        <td>\${e.description||'–'}</td>
+        <td>\${e.revenuAnnuel.toLocaleString('fr-CH')}</td>
+        <td>\${e.tauxCap}%</td>
+        <td style="text-align:right">\${e.vr.toLocaleString('fr-CH')}</td>
+      </tr>\`).join('')}
+      <tr class="total-row"><td colspan="3"><strong>Sous-total énergie (élément non agricole)</strong></td><td style="text-align:right"><strong>\${r.vrEnergie.toLocaleString('fr-CH')}</strong></td></tr>
+    </table>\` : ''}
+
+    \${parcellesZAB.length > 0 ? \`
+    <div style="margin-top:14px;padding:10px 14px;background:#fff7ed;border:1.5px solid #fb923c;border-radius:6px;">
+      <strong style="color:#c2410c">⚠ Surfaces en zone à bâtir — hors périmètre LDFR (art. 2)</strong>
+      <table style="margin-top:8px">
+        <tr><th>N° parcelle</th><th>Zone</th><th>Surface (m²)</th><th>Prix estimé (CHF/m²)</th><th style="text-align:right">Valeur vénale (CHF)</th></tr>
+        \${parcellesZAB.map(z => \`<tr>
+          <td>\${z.parcelNo||'–'}</td>
+          <td>\${z.zone}</td>
+          <td>\${z.surfaceM2.toLocaleString('fr-CH')}</td>
+          <td>\${z.prixM2.toLocaleString('fr-CH')}</td>
+          <td style="text-align:right">\${z.valeurVenale.toLocaleString('fr-CH')}</td>
+        </tr>\`).join('')}
+        <tr class="total-row"><td colspan="4"><strong>Valeur vénale totale ZAB (hors VRA)</strong></td><td style="text-align:right"><strong>\${r.vrZAB.toLocaleString('fr-CH')}</strong></td></tr>
+      </table>
+    </div>\` : ''}
+
 
     <h2>4. Bâtiments et logements</h2>
     <h3>A. Logement du chef d'exploitation (évaluation à la valeur agricole)</h3>
@@ -2031,6 +2126,29 @@ function generateReport(type) {
       </tr>
     </table>` : ''}
 
+    
+    \${(servitudes.length > 0 || annotations.length > 0 || ddps.length > 0 || hypotheques.length > 0) ? \`
+    <h2>6b. Données du registre foncier</h2>
+    \${servitudes.length > 0 ? \`<h3>Servitudes à charge</h3><table>
+      <tr><th>Type</th><th>Ayant droit</th><th>Description</th><th>Impact VRA</th></tr>
+      \${servitudes.map(s=>\`<tr><td>\${s.type}</td><td>\${s.ayant_droit||'–'}</td><td>\${s.description||'–'}</td><td>\${s.impact}</td></tr>\`).join('')}
+    </table>\` : ''}
+    \${annotations.length > 0 ? \`<h3>Annotations RF</h3><table>
+      <tr><th>Type</th><th>Description</th><th>Parcelle(s)</th></tr>
+      \${annotations.map(a=>\`<tr><td>\${a.type}</td><td>\${a.description||'–'}</td><td>\${a.parcelles||'–'}</td></tr>\`).join('')}
+    </table>\` : ''}
+    \${ddps.length > 0 ? \`<h3>Droits de superficie (DDP)</h3><table>
+      <tr><th>Description</th><th>Superficiaire</th><th>Durée restante</th></tr>
+      \${ddps.map(d=>\`<tr><td>\${d.description||'–'}</td><td>\${d.superficiaireNom||'–'}</td><td>\${d.dureeRestante} ans</td></tr>\`).join('')}
+    </table>\` : ''}
+    \${hypotheques.length > 0 ? \`<h3>Hypothèques inscrites au RF</h3><table>
+      <tr><th>Type</th><th>Créancier</th><th>Rang</th><th style="text-align:right">Montant (CHF)</th></tr>
+      \${hypotheques.map(hh=>\`<tr><td>\${hh.type}</td><td>\${hh.creancier||'–'}</td><td>\${hh.rang}</td><td style="text-align:right">\${hh.montant.toLocaleString('fr-CH')}</td></tr>\`).join('')}
+      <tr class="total-row"><td colspan="3"><strong>Total hypothèques</strong></td><td style="text-align:right"><strong>\${hypotheques.reduce((s,hh)=>s+hh.montant,0).toLocaleString('fr-CH')}</strong></td></tr>
+    </table>
+    <div class="cm-box" style="margin-top:8px"><strong>Charge maximale LDFR art. 73 :</strong> CHF \${r.chargeMaximale.toLocaleString('fr-CH')}</div>
+    \` : ''}
+    \` : ''}
     <h2>7. Récapitulatif – Détermination de la valeur de rendement</h2>
     <table>
       <tr><th>Composante</th><th style="text-align:right">Valeur locative (CHF)</th><th style="text-align:right">VR (CHF)</th><th style="text-align:right">Part (%)</th></tr>
@@ -2080,6 +2198,24 @@ function generateReport(type) {
     <h2>9. Observations et réserves</h2>
     <p style="font-size:10pt;padding:10px 12px;background:#f9f9f9;border-left:3px solid #4a7c40;border-radius:0 4px 4px 0;">${data.observations.replace(/\n/g,'<br>')}</p>` : ''}
 
+
+    \${photos.length > 0 ? \`
+    <div style="page-break-before:always"></div>
+    <h2>Photographies</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px">
+      \${photos.map(p=>\`<div style="break-inside:avoid">
+        <img src="\${p.dataUrl}" style="width:100%;max-height:200px;object-fit:cover;border-radius:4px;border:1px solid #ddd">
+        <p style="font-size:9pt;color:#555;margin:4px 0 0;\${p.legende?'':'color:#bbb;font-style:italic'}">\${p.legende||'(sans légende)'}</p>
+      </div>\`).join('')}
+    </div>\` : ''}
+
+    \${(document.getElementById('conclusion-synthese')?.value || document.getElementById('conclusion-qualitatif')?.value || document.getElementById('conclusion-reserves')?.value) ? \`
+    <div style="page-break-before:always"></div>
+    <h2>Conclusion</h2>
+    \${document.getElementById('conclusion-synthese')?.value ? \`<h3>Synthèse de la valeur de rendement</h3><p style="font-size:10pt;line-height:1.6;">\${document.getElementById('conclusion-synthese').value}</p>\` : ''}
+    \${document.getElementById('conclusion-qualitatif')?.value ? \`<h3>Éléments qualitatifs et observations déterminantes</h3><p style="font-size:10pt;line-height:1.6;">\${document.getElementById('conclusion-qualitatif').value}</p>\` : ''}
+    \${document.getElementById('conclusion-reserves')?.value ? \`<h3>Réserves et conditions de validité</h3><p style="font-size:10pt;line-height:1.6;">\${document.getElementById('conclusion-reserves').value}</p>\` : ''}
+    \` : ''}
     <div class="disclaimer">
       <strong>Bases légales :</strong> La présente estimation est établie conformément à l'article 87 de la Loi fédérale sur le droit foncier rural (LDFR, RS 211.412.11), à l'Ordonnance sur le droit foncier rural (ODFR, RS 211.412.110) et au Guide pour l'estimation de la valeur de rendement agricole en vigueur depuis le 1<sup>er</sup> avril 2018. Le calcul de la charge maximale est basé sur les articles 73 et s. LDFR. <strong>Taux de capitalisation : 4.24%.</strong> Période de calcul de référence : 2009–2024. Cette estimation ne constitue pas un acte officiel au sens du droit foncier rural sans validation de l'autorité cantonale compétente.
     </div>
@@ -3274,6 +3410,76 @@ function updatePhotoStats() {
     const el = document.getElementById('count-' + cat);
     if (el) el.textContent = cnt + ' photo(s)';
   });
+}
+
+
+// ══════════════════════════════════════════════
+// ALERTES CONTEXTUELLES SELON RAISON
+// ══════════════════════════════════════════════
+function updateLegalAlerts() {
+  const box = document.getElementById('legal-alerts-box');
+  if (!box) return;
+  const raisonEl = document.getElementById('raisonEstimation');
+  const raison = raisonEl ? raisonEl.value : '';
+  const r = getGrandTotal();
+
+  const alerts = [];
+
+  if (raison === 'succession') {
+    alerts.push({color:'blue', icon:'⚖️', title:'Succession / partage (art. 17–22 LDFR)',
+      text:'La valeur de rendement est la valeur de reprise légale entre cohéritiers. Si plusieurs héritiers revendiquent l'exploitation, le tribunal peut trancher sur la base de cette valeur. La soulte est calculée sur la VRA, non sur la valeur vénale.'});
+  }
+  if (raison === 'achat_vente') {
+    alerts.push({color:'green', icon:'🤝', title:'Achat / vente soumis à la LDFR',
+      text:'Le prix de vente ne peut pas dépasser la valeur de rendement (art. 66 LDFR), sauf autorisation cantonale exceptionnelle. Le contrat doit être approuvé par l'autorité cantonale si l'entreprise est soumise au droit de préemption (art. 47 ss LDFR).'});
+  }
+  if (raison === 'credit') {
+    alerts.push({color:'amber', icon:'🏦', title:'Crédit hypothécaire (art. 73–76 LDFR)',
+      text:`La charge maximale admissible est de CHF ${r.chargeMaximale.toLocaleString('fr-CH')}. Au-delà, l'autorité cantonale doit approuver tout nouveau gage. Comparez avec les hypothèques existantes inscrites au RF (Step 4).`});
+    if (hypotheques.length > 0) {
+      const totalHyp = hypotheques.reduce((s,h)=>s+h.montant,0);
+      if (totalHyp > r.chargeMaximale) {
+        alerts.push({color:'red', icon:'⚠️', title:'Dépassement de la charge maximale',
+          text:`Les hypothèques inscrites (CHF ${totalHyp.toLocaleString('fr-CH')}) dépassent la charge maximale légale (CHF ${r.chargeMaximale.toLocaleString('fr-CH')}). Un crédit supplémentaire ne pourra pas être garanti sans autorisation cantonale (art. 76 LDFR).`});
+      }
+    }
+  }
+  if (raison === 'fermage') {
+    alerts.push({color:'purple', icon:'📋', title:'Fixation du fermage (LF art. 2)',
+      text:'Le fermage admissible est plafonné selon les directives cantonales et la loi sur le bail à ferme agricole (LBFA). La VRA sert de base de référence pour évaluer l'adéquation du loyer de fermage. Un fermage excessif peut être contesté par le fermier.'});
+  }
+  if (raison === 'droit_preemption') {
+    alerts.push({color:'green', icon:'🔑', title:'Droit de préemption (art. 42–46 LDFR)',
+      text:'Les héritiers, puis les affermés et les propriétaires voisins disposent d'un droit de préemption légal. Ce droit s'exerce au prix d'achat convenu, mais dans tous les cas limité à la valeur de rendement si l'ayant droit est agriculteur à titre principal.'});
+  }
+  if (raison === 'evaluation_officielle') {
+    alerts.push({color:'gray', icon:'🏛️', title:'Estimation officielle / procédure judiciaire',
+      text:'Cette estimation suit strictement la méthode LDFR/ODFR. Elle peut être produite devant une autorité cantonale ou un tribunal. Veillez à ce que toutes les données soient vérifiables et les sources documentées (extraits RF, plans cadastraux, devis).'});
+  }
+
+  // Always check: ZAB present
+  if (r.vrZAB > 0) {
+    alerts.push({color:'orange', icon:'🏗️', title:'Attention : surfaces en zone à bâtir présentes',
+      text:`CHF ${r.vrZAB.toLocaleString('fr-CH')} de valeur vénale estimée pour des surfaces hors LDFR. Ces surfaces ne font pas partie de la valeur de rendement agricole. Elles doivent être valorisées dans un acte séparé ou une expertise immobilière distincte.`});
+  }
+
+  const COLOR = {
+    blue:'#dbeafe;border-color:#3b82f6;color:#1e40af',
+    green:'#dcfce7;border-color:#16a34a;color:#14532d',
+    amber:'#fef3c7;border-color:#f59e0b;color:#92400e',
+    red:'#fee2e2;border-color:#ef4444;color:#991b1b',
+    purple:'#f3e8ff;border-color:#9333ea;color:#581c87',
+    orange:'#fff7ed;border-color:#f97316;color:#7c2d12',
+    gray:'#f3f4f6;border-color:#9ca3af;color:#374151',
+  };
+
+  if (alerts.length === 0) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  box.innerHTML = `<h3 class="text-base font-semibold text-gray-700 mb-3">⚠ Points d'attention selon la raison d'estimation</h3>` +
+    alerts.map(a => `<div class="rounded-lg p-4 mb-3 border" style="background:${COLOR[a.color].split(';')[0]};border-color:${COLOR[a.color].split('border-color:')[1]?.split(';')[0]||'#ccc'}">
+      <div class="font-semibold text-sm mb-1" style="color:${COLOR[a.color].split('color:')[1]||'#333'}">${a.icon} ${a.title}</div>
+      <div class="text-xs leading-relaxed" style="color:${COLOR[a.color].split('color:')[1]||'#555'}">${a.text}</div>
+    </div>`).join('');
 }
 
 </script>
