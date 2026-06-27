@@ -3426,35 +3426,35 @@ function updateLegalAlerts() {
   const alerts = [];
 
   if (raison === 'succession') {
-    alerts.push({color:'blue', icon:'⚖️', title:'Succession / partage (art. 17–22 LDFR)',
-      text:'La valeur de rendement est la valeur de reprise légale entre cohéritiers. Si plusieurs héritiers revendiquent l'exploitation, le tribunal peut trancher sur la base de cette valeur. La soulte est calculée sur la VRA, non sur la valeur vénale.'});
+    alerts.push({color:'blue', icon:'⚖️', title:"Succession / partage (art. 17–22 LDFR)",
+      text:"La valeur de rendement est la valeur de reprise légale entre cohéritiers. Si plusieurs héritiers revendiquent l'exploitation, le tribunal peut trancher sur la base de cette valeur. La soulte est calculée sur la VRA, non sur la valeur vénale."});
   }
   if (raison === 'achat_vente') {
-    alerts.push({color:'green', icon:'🤝', title:'Achat / vente soumis à la LDFR',
-      text:'Le prix de vente ne peut pas dépasser la valeur de rendement (art. 66 LDFR), sauf autorisation cantonale exceptionnelle. Le contrat doit être approuvé par l'autorité cantonale si l'entreprise est soumise au droit de préemption (art. 47 ss LDFR).'});
+    alerts.push({color:'green', icon:'🤝', title:"Achat / vente soumis à la LDFR",
+      text:"Le prix de vente ne peut pas dépasser la valeur de rendement (art. 66 LDFR), sauf autorisation cantonale exceptionnelle. Le contrat doit être approuvé par l'autorité cantonale si l'entreprise est soumise au droit de préemption (art. 47 ss LDFR)."});
   }
   if (raison === 'credit') {
-    alerts.push({color:'amber', icon:'🏦', title:'Crédit hypothécaire (art. 73–76 LDFR)',
+    alerts.push({color:'amber', icon:'🏦', title:"Crédit hypothécaire (art. 73–76 LDFR)",
       text:`La charge maximale admissible est de CHF ${r.chargeMaximale.toLocaleString('fr-CH')}. Au-delà, l'autorité cantonale doit approuver tout nouveau gage. Comparez avec les hypothèques existantes inscrites au RF (Step 4).`});
     if (hypotheques.length > 0) {
       const totalHyp = hypotheques.reduce((s,h)=>s+h.montant,0);
       if (totalHyp > r.chargeMaximale) {
-        alerts.push({color:'red', icon:'⚠️', title:'Dépassement de la charge maximale',
+        alerts.push({color:'red', icon:'⚠️', title:"Dépassement de la charge maximale",
           text:`Les hypothèques inscrites (CHF ${totalHyp.toLocaleString('fr-CH')}) dépassent la charge maximale légale (CHF ${r.chargeMaximale.toLocaleString('fr-CH')}). Un crédit supplémentaire ne pourra pas être garanti sans autorisation cantonale (art. 76 LDFR).`});
       }
     }
   }
   if (raison === 'fermage') {
-    alerts.push({color:'purple', icon:'📋', title:'Fixation du fermage (LF art. 2)',
-      text:'Le fermage admissible est plafonné selon les directives cantonales et la loi sur le bail à ferme agricole (LBFA). La VRA sert de base de référence pour évaluer l'adéquation du loyer de fermage. Un fermage excessif peut être contesté par le fermier.'});
+    alerts.push({color:'purple', icon:'📋', title:"Fixation du fermage (LBFA)",
+      text:"Le fermage admissible est plafonné selon les directives cantonales et la loi sur le bail à ferme agricole (LBFA). La VRA sert de base de référence pour évaluer l'adéquation du loyer de fermage. Un fermage excessif peut être contesté par le fermier."});
   }
   if (raison === 'droit_preemption') {
-    alerts.push({color:'green', icon:'🔑', title:'Droit de préemption (art. 42–46 LDFR)',
-      text:'Les héritiers, puis les affermés et les propriétaires voisins disposent d'un droit de préemption légal. Ce droit s'exerce au prix d'achat convenu, mais dans tous les cas limité à la valeur de rendement si l'ayant droit est agriculteur à titre principal.'});
+    alerts.push({color:'green', icon:'🔑', title:"Droit de préemption (art. 42–46 LDFR)",
+      text:"Les héritiers, puis les affermés et les propriétaires voisins disposent d'un droit de préemption légal. Ce droit s'exerce au prix d'achat convenu, mais dans tous les cas limité à la valeur de rendement si l'ayant droit est agriculteur à titre principal."});
   }
   if (raison === 'evaluation_officielle') {
-    alerts.push({color:'gray', icon:'🏛️', title:'Estimation officielle / procédure judiciaire',
-      text:'Cette estimation suit strictement la méthode LDFR/ODFR. Elle peut être produite devant une autorité cantonale ou un tribunal. Veillez à ce que toutes les données soient vérifiables et les sources documentées (extraits RF, plans cadastraux, devis).'});
+    alerts.push({color:'gray', icon:'🏛️', title:"Estimation officielle / procédure judiciaire",
+      text:"Cette estimation suit strictement la méthode LDFR/ODFR. Elle peut être produite devant une autorité cantonale ou un tribunal. Veillez à ce que toutes les données soient vérifiables et les sources documentées (extraits RF, plans cadastraux, devis)."});
   }
 
   // Always check: ZAB present
