@@ -94,12 +94,22 @@
       <div class="text-gray-300 font-bold">›</div>
       <button onclick="goToStep(4)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-4">
         <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc4">4</span>
-        <span>Autres éléments</span>
+        <span>Reg. foncier</span>
       </button>
       <div class="text-gray-300 font-bold">›</div>
       <button onclick="goToStep(5)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-5">
         <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc5">5</span>
-        <span>Résultats & Rapport</span>
+        <span>Corrections</span>
+      </button>
+      <div class="text-gray-300 font-bold">›</div>
+      <button onclick="goToStep(6)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-6">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc6">6</span>
+        <span>Photos</span>
+      </button>
+      <div class="text-gray-300 font-bold">›</div>
+      <button onclick="goToStep(7)" class="step-btn flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap" id="step-btn-7">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs step-circle" id="sc7">7</span>
+        <span>Résultats</span>
       </button>
     </div>
   </div>
@@ -225,6 +235,71 @@
         <textarea id="generalRemarks" rows="3" placeholder="Contexte du mandat, conditions particulières, objet de la visite..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
       </div>
     </div>
+
+    
+      <!-- ── Droits d'alpage / surfaces d'estivage ── -->
+      <div class="mt-8">
+        <h3 class="text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold">A</span>
+          Droits d'alpage / surfaces d'estivage
+          <button type="button" class="help-btn" onclick="showHelp('droits_alpage')">?</button>
+        </h3>
+        <div class="rounded-lg p-3 mb-3 text-xs" style="background:#f3e8ff;border:1px solid #c084fc">
+          Alpages, pâturages d'estivage et droits d'alpage quantifiés en UGB estivées ou NS. Évalués par capitalisation du fermage d'alpage selon tables ODFR zones C–G.
+        </div>
+        <div id="alpages-container"></div>
+        <button onclick="addAlpage()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Ajouter un alpage / droit d'alpage
+        </button>
+        <div class="mt-3 p-3 bg-purple-50 rounded flex justify-between items-center text-sm">
+          <span class="text-gray-600">VR droits d'alpage :</span>
+          <span class="font-bold text-purple-800" id="total-vr-alpages">CHF 0</span>
+        </div>
+      </div>
+
+      <!-- ── Surfaces en zone à bâtir ── -->
+      <div class="mt-8">
+        <h3 class="text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">Z</span>
+          Surfaces en zone à bâtir
+          <button type="button" class="help-btn" onclick="showHelp('zone_batir')">?</button>
+        </h3>
+        <div class="rounded-lg p-3 mb-3 text-xs" style="background:#fff7ed;border:1px solid #fb923c">
+          <strong>⚠ Hors VRA légale (LDFR art. 2) :</strong> les surfaces classées en zone à bâtir sont exclues du périmètre LDFR et valorisées séparément à la valeur vénale. Elles n'entrent pas dans la VRA ni dans la charge maximale art. 73.
+        </div>
+        <div id="zab-container"></div>
+        <button onclick="addZAB()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Ajouter une surface en zone à bâtir
+        </button>
+        <div class="mt-3 p-3 rounded flex justify-between items-center text-sm" style="background:#fff7ed">
+          <span class="text-gray-600">Valeur vénale estimée ZAB (hors VRA) :</span>
+          <span class="font-bold text-orange-700" id="total-vr-zab">CHF 0</span>
+        </div>
+      </div>
+
+    
+      <!-- ── Installations de production d'énergie ── -->
+      <div class="mt-8">
+        <h3 class="text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center text-xs font-bold">⚡</span>
+          Installations de production d'énergie
+          <button type="button" class="help-btn" onclick="showHelp('energie_pv')">?</button>
+        </h3>
+        <div class="rounded-lg p-3 mb-3 text-xs" style="background:#fefce8;border:1px solid #fbbf24">
+          Panneaux PV, biogaz, éolien. Si le revenu est contractualisé (contrat de rachat RPC/KEV), il est capitalisé comme <strong>élément non agricole art. 10 al. 3 LDFR</strong> à 6.0% (durée contrat) et ajouté hors VRA agricole.
+        </div>
+        <div id="energie-container"></div>
+        <button onclick="addEnergie()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Ajouter une installation
+        </button>
+        <div class="mt-3 p-3 bg-yellow-50 rounded flex justify-between items-center text-sm">
+          <span class="text-gray-600">VR énergie (élément non agricole art. 10 al. 3) :</span>
+          <span class="font-bold text-yellow-700" id="total-vr-energie">CHF 0</span>
+        </div>
+      </div>
 
     <div class="mt-8 flex justify-end">
       <button onclick="nextStep(1)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">
@@ -409,13 +484,99 @@
 
     <div class="mt-6 flex justify-between">
       <button onclick="prevStep(3)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
-      <button onclick="nextStep(3)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Autres éléments</button>
+      <button onclick="nextStep(3)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Registre foncier</button>
     </div>
   </div>
 </div>
 
-<!-- ============ STEP 4: CORRECTIONS & AUTRES ÉLÉMENTS ============ -->
+<!-- ============ STEP 4: REGISTRE FONCIER ============ -->
 <div id="step-4" class="step-content hidden">
+  <div class="card p-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Registre foncier &amp; données juridiques</h2>
+    <p class="text-sm text-gray-500 mb-4">Servitudes, annotations, droits de superficie et hypothèques. Ces données influencent les corrections de valeur et la comparaison avec la charge maximale art. 73 LDFR.</p>
+
+    <details class="step-guide bg-green-50 border border-green-200 rounded-lg p-3 mb-6" open>
+      <summary>⚖️ Guide — Registre foncier</summary>
+      <div class="mt-3 text-gray-600 leading-relaxed text-xs space-y-1">
+        <p>Munissez-vous de l'<strong>extrait RF complet</strong> (feuillets 1–3 + extraits parcellaires). Certaines servitudes ou annotations (SITEX, zone de protection des eaux, DDP) constituent des moins-values légalement reconnues. Les hypothèques sont comparées à la charge maximale LDFR art. 73.</p>
+      </div>
+    </details>
+
+    <!-- Servitudes à charge -->
+    <div class="mb-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold">S</span>
+        Servitudes à charge de la propriété
+      </h3>
+      <div id="servitudes-container"></div>
+      <button onclick="addServitude()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter une servitude
+      </button>
+    </div>
+
+    <!-- Annotations RF -->
+    <div class="mb-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">A</span>
+        Annotations et restrictions légales
+      </h3>
+      <div class="rounded-lg p-3 mb-3 text-xs" style="background:#fff7ed;border:1px solid #fb923c">
+        Ex. : SITEX (zone de sources), zones de protection des eaux S1/S2/S3, restrictions forestières, annotations liées à l'agriculture.
+      </div>
+      <div id="annotations-container"></div>
+      <button onclick="addAnnotation()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter une annotation
+      </button>
+    </div>
+
+    <!-- DDP -->
+    <div class="mb-8">
+      <h3 class="text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">D</span>
+        Droits de superficie (DDP)
+      </h3>
+      <div id="ddp-container"></div>
+      <button onclick="addDDP()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter un DDP
+      </button>
+    </div>
+
+    <!-- Hypothèques -->
+    <div class="mb-6">
+      <h3 class="text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold">H</span>
+        Hypothèques / droits de gage immobilier existants
+      </h3>
+      <div id="hypotheques-container"></div>
+      <button onclick="addHypotheque()" class="mt-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter une hypothèque
+      </button>
+      <div class="mt-4 p-4 rounded-lg" style="background:#f1f5f9;border:1px solid #cbd5e1">
+        <div class="flex justify-between text-sm mb-1">
+          <span class="text-gray-600">Total hypothèques inscrites au RF :</span>
+          <span class="font-bold" id="total-hypotheques">CHF 0</span>
+        </div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-gray-600">Charge maximale LDFR art. 73 (calculée à l'étape 7) :</span>
+          <span class="font-bold text-green-800" id="charge-max-rf">CHF –</span>
+        </div>
+        <div id="charge-max-alert" class="text-xs p-2 rounded mt-1 hidden"></div>
+      </div>
+    </div>
+
+    <div class="mt-8 flex justify-between">
+      <button onclick="prevStep(4)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Bâtiments</button>
+      <button onclick="nextStep(4)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Corrections</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 5: CORRECTIONS & AUTRES ÉLÉMENTS ============ -->
+<div id="step-5" class="step-content hidden">
   <div class="card p-8">
     <h2 class="text-xl font-bold text-gray-800 mb-1">Corrections & Autres éléments</h2>
     <p class="text-sm text-gray-500 mb-3">Plus-values, moins-values, forêts et éléments non agricoles.</p>
@@ -520,14 +681,91 @@
     </div>
 
     <div class="mt-6 flex justify-between">
-      <button onclick="prevStep(4)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
-      <button onclick="nextStep(4)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Résultats</button>
+      <button onclick="prevStep(5)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
+      <button onclick="nextStep(5)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Résultats</button>
     </div>
   </div>
 </div>
 
-<!-- ============ STEP 5: RÉSULTATS & RAPPORT ============ -->
-<div id="step-5" class="step-content hidden">
+<!-- ============ STEP 6: PHOTOS & DOCUMENTATION ============ -->
+<div id="step-6" class="step-content hidden">
+  <div class="card p-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Photos &amp; documentation</h2>
+    <p class="text-sm text-gray-500 mb-4">Ajoutez les photos prises lors de la visite avec leur légende. Elles seront intégrées dans le rapport PDF/Word.</p>
+
+    <div class="grid grid-cols-3 gap-3 mb-6" id="photo-stats">
+      <div class="text-center p-3 rounded-lg border border-gray-200 bg-gray-50">
+        <div class="text-2xl mb-1">🏡</div>
+        <div class="text-xs font-medium text-gray-600">Vue générale</div>
+        <div class="text-xs text-gray-400" id="count-vue_generale">0 photo(s)</div>
+      </div>
+      <div class="text-center p-3 rounded-lg border border-gray-200 bg-gray-50">
+        <div class="text-2xl mb-1">🏠</div>
+        <div class="text-xs font-medium text-gray-600">Logement</div>
+        <div class="text-xs text-gray-400" id="count-logement_ph">0 photo(s)</div>
+      </div>
+      <div class="text-center p-3 rounded-lg border border-gray-200 bg-gray-50">
+        <div class="text-2xl mb-1">🏗️</div>
+        <div class="text-xs font-medium text-gray-600">Bâtiments agric.</div>
+        <div class="text-xs text-gray-400" id="count-batiment_ph">0 photo(s)</div>
+      </div>
+      <div class="text-center p-3 rounded-lg border border-gray-200 bg-gray-50">
+        <div class="text-2xl mb-1">🌾</div>
+        <div class="text-xs font-medium text-gray-600">Surfaces</div>
+        <div class="text-xs text-gray-400" id="count-surface_ph">0 photo(s)</div>
+      </div>
+      <div class="text-center p-3 rounded-lg border border-gray-200 bg-gray-50">
+        <div class="text-2xl mb-1">⚙️</div>
+        <div class="text-xs font-medium text-gray-600">Équipements</div>
+        <div class="text-xs text-gray-400" id="count-equipement_ph">0 photo(s)</div>
+      </div>
+      <div class="text-center p-3 rounded-lg border border-gray-200 bg-gray-50">
+        <div class="text-2xl mb-1">📋</div>
+        <div class="text-xs font-medium text-gray-600">Justificatifs ±</div>
+        <div class="text-xs text-gray-400" id="count-justificatif_ph">0 photo(s)</div>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Légende de la photo</label>
+          <input type="text" id="photo-legende" placeholder="Ex. Stabulation vue de face, capacité 80 UGB" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Catégorie</label>
+          <select id="photo-categorie" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option value="vue_generale">Vue générale</option>
+            <option value="logement_ph">Logement</option>
+            <option value="batiment_ph">Bâtiment agricole</option>
+            <option value="surface_ph">Surface agricole</option>
+            <option value="equipement_ph">Équipement / PV</option>
+            <option value="justificatif_ph">Justificatif plus/moins-value</option>
+            <option value="autre_ph">Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="inline-flex items-center gap-2 btn-secondary px-4 py-2 rounded-lg text-sm font-medium cursor-pointer border">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Ajouter photo(s)
+          <input type="file" accept="image/*" multiple class="hidden" onchange="handlePhotoUpload(this)">
+        </label>
+        <span class="text-xs text-gray-400 ml-3">JPG, PNG — max 5 Mo par photo</span>
+      </div>
+    </div>
+
+    <div id="photos-grid" class="grid grid-cols-3 gap-4 mt-2"></div>
+
+    <div class="mt-8 flex justify-between">
+      <button onclick="prevStep(6)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Corrections</button>
+      <button onclick="nextStep(6)" class="btn-primary px-6 py-2.5 rounded-lg font-medium text-sm">Suivant → Résultats</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 7: RÉSULTATS & CONCLUSION ============ -->
+<div id="step-7" class="step-content hidden">
 
   <!-- Grand total -->
   <div class="vr-result p-8 mb-6">
@@ -587,7 +825,7 @@
   </div>
 
   <div class="flex justify-between no-print">
-    <button onclick="prevStep(5)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
+    <button onclick="prevStep(7)" class="btn-secondary px-5 py-2.5 rounded-lg font-medium text-sm">← Retour</button>
     <button onclick="resetForm()" class="btn-danger px-5 py-2.5 rounded-lg font-medium text-sm">Nouvelle estimation</button>
   </div>
 </div>
@@ -725,7 +963,7 @@ let plusMinusCounter = 0;
 // NAVIGATION
 // ============================================================
 function updateStepUI() {
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 7; i++) {
     const btn = document.getElementById(`step-btn-${i}`);
     const circle = document.getElementById(`sc${i}`);
     const content = document.getElementById(`step-${i}`);
@@ -749,11 +987,11 @@ function updateStepUI() {
     }
   }
 
-  if (currentStep === 5) updateResults();
+  if (currentStep === 7) updateResults();
 }
 
 function goToStep(n) { currentStep = n; updateStepUI(); window.scrollTo(0,0); }
-function nextStep(from) { if (from < 5) goToStep(from + 1); }
+function nextStep(from) { if (from < 7) goToStep(from + 1); }
 function prevStep(from) { if (from > 1) goToStep(from - 1); }
 
 // ============================================================
@@ -770,7 +1008,7 @@ function fmtCHF(n) {
 function addParcel() {
   const id = ++parcelCounter;
   const p = {id, surface: 0, type: 'terres_arables', zone: 'A1A2B1B2', qualite: 'bonne', accessibilite: 4,
-             declivite: '0-18', taille: '>1.5', distKm: 0, vr: 0, description: ''};
+             declivite: '0-18', taille: '>1.5', distKm: 0, vr: 0, description: '', parcelNo: '', commentaire: '', affermee: false, nomFermier: ''};
   parcels.push(p);
   renderParcels();
 }
@@ -795,10 +1033,15 @@ function renderParcels() {
         <h4 class="font-semibold text-gray-700">Surface ${idx + 1}${p.description ? ' – ' + p.description : ''}</h4>
         <button onclick="removeParcel(${p.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
       </div>
-      <div class="grid grid-cols-3 gap-3 mb-3">
+      <div class="grid grid-cols-4 gap-3 mb-3">
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Description (optionnel)</label>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description / lieu-dit</label>
           <input type="text" value="${p.description}" placeholder="Ex. Prairie du bas" onchange="updateParcel(${p.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">N° parcelle(s) RF</label>
+          <input type="text" value="${p.parcelNo||''}" placeholder="Ex. 1234, 1235" onchange="updateParcel(${p.id},'parcelNo',this.value)"
             class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
         </div>
         <div>
@@ -873,7 +1116,26 @@ function renderParcels() {
             class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
         </div>
       </div>
-      <div class="mt-3 p-2 bg-green-50 rounded flex justify-between items-center">
+      <div class="grid grid-cols-2 gap-3 mt-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Commentaire / observations de visite</label>
+          <textarea rows="2" placeholder="Ex. Sol bien drainé, légère pente, accessible par chemin communal..." onchange="updateParcel(${p.id},'commentaire',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">${p.commentaire||''}</textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Surface affermée à un tiers ?</label>
+          <div class="flex items-center gap-2 mt-1">
+            <input type="checkbox" ${p.affermee?'checked':''} onchange="updateParcel(${p.id},'affermee',this.checked); document.getElementById('fermier-${p.id}').style.display=this.checked?'block':'none'"
+              class="w-4 h-4 accent-green-700">
+            <span class="text-xs text-gray-600">Oui, affermée sortante</span>
+          </div>
+          <div id="fermier-${p.id}" style="display:${p.affermee?'block':'none'}" class="mt-2">
+            <input type="text" value="${p.nomFermier||''}" placeholder="Nom du fermier" onchange="updateParcel(${p.id},'nomFermier',this.value)"
+              class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 p-2 bg-green-50 rounded flex justify-between items-center">
         <span class="text-xs text-gray-600">VR de base : <strong id="vr-base-${p.id}">–</strong> CHF/ha · Corrections : <strong id="vr-corr-${p.id}">–</strong></span>
         <span class="text-sm font-bold text-green-800">VR : <span id="vr-parcel-${p.id}">CHF 0</span></span>
       </div>
@@ -943,6 +1205,8 @@ function calcAllSol() {
 
 function updateSolGlobalTotal() {
   const vrSol = parcels.reduce((s,p) => s + p.vr, 0);
+    const vrAlpages = alpages.reduce((s,a) => s + a.vr, 0);
+    const vrEnergie = installationsEnergie.reduce((s,e) => s + e.vr, 0);
   const vrCult = culturesSpeciales.reduce((s,c) => s + c.vr, 0);
   const cultEl = document.getElementById('total-vr-cultures');
   const globEl = document.getElementById('total-vr-sol-global');
@@ -1220,7 +1484,7 @@ function updateOtherLog(id, field, value) {
 
 function addBuilding() {
   const id = ++buildingCounter;
-  buildings.push({id, description: '', type: 'etable', locative: 0, etat: 'moyen', vr: 0});
+  buildings.push({id, description: '', type: 'etable', locative: 0, etat: 'moyen', vr: 0, commentaire: '', surdimensionne: false, sansDroit: false, protege: false});
   renderBuildings();
 }
 
@@ -1238,7 +1502,7 @@ function renderBuildings() {
   }
   c.innerHTML = buildings.map(b => `
     <div class="building-card bg-white border border-gray-200 rounded-lg p-4 mb-3">
-      <div class="grid grid-cols-4 gap-3 items-end">
+      <div class="grid grid-cols-4 gap-3 items-end mb-3">
         <div class="col-span-2">
           <label class="block text-xs font-medium text-gray-600 mb-1">Description du bâtiment</label>
           <input type="text" value="${b.description}" placeholder="Ex. Étable bovins, Grange à fourrage, Hangar machines"
@@ -1246,11 +1510,28 @@ function renderBuildings() {
             class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Valeur locative annuelle (CHF) <button type="button" class="help-btn" onclick="showHelp('batiment_locative')">?</button></label>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Type de bâtiment</label>
+          <select onchange="updateBuilding(${b.id},'type',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="etable" ${b.type==='etable'?'selected':''}>Stabulation / étable</option>
+            <option value="grange" ${b.type==='grange'?'selected':''}>Grange / fenil</option>
+            <option value="cave_viticole" ${b.type==='cave_viticole'?'selected':''}>Cave viticole</option>
+            <option value="serre" ${b.type==='serre'?'selected':''}>Serre / tunnel maraîcher</option>
+            <option value="robot_traite" ${b.type==='robot_traite'?'selected':''}>Salle / robot de traite</option>
+            <option value="sechoir" ${b.type==='sechoir'?'selected':''}>Séchoir à fourrage / céréales</option>
+            <option value="hangar" ${b.type==='hangar'?'selected':''}>Hangar / remise agricole</option>
+            <option value="silo" ${b.type==='silo'?'selected':''}>Silo</option>
+            <option value="biogaz" ${b.type==='biogaz'?'selected':''}>Installation biogaz</option>
+            <option value="autre" ${b.type==='autre'?'selected':''}>Autre bâtiment agricole</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Valeur locative / an (CHF) <button type="button" class="help-btn" onclick="showHelp('batiment_locative')">?</button></label>
           <input type="number" value="${b.locative}" min="0" step="100"
             onchange="updateBuilding(${b.id},'locative',parseFloat(this.value)||0)"
             class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
         </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">État / DUR <button type="button" class="help-btn" onclick="showHelp('batiment_etat_dur')">?</button></label>
           <select onchange="updateBuilding(${b.id},'etat',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
@@ -1259,11 +1540,31 @@ function renderBuildings() {
             ).join('')}
           </select>
         </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Commentaire / état détaillé</label>
+          <input type="text" value="${b.commentaire||''}" placeholder="Toiture refaite 2022, capacité 60 UGB, état bon..."
+            onchange="updateBuilding(${b.id},'commentaire',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
       </div>
-      <div class="mt-2 flex justify-between items-center">
+      <div class="flex gap-4 mt-2">
+        <label class="flex items-center gap-1.5 text-xs cursor-pointer">
+          <input type="checkbox" ${b.surdimensionne?'checked':''} onchange="updateBuilding(${b.id},'surdimensionne',this.checked)" class="accent-orange-500">
+          <span class="text-orange-700 font-medium">Surdimensionné</span>
+        </label>
+        <label class="flex items-center gap-1.5 text-xs cursor-pointer">
+          <input type="checkbox" ${b.sansDroit?'checked':''} onchange="updateBuilding(${b.id},'sansDroit',this.checked)" class="accent-red-500">
+          <span class="text-red-700 font-medium">Sans droit / non valorisable</span>
+        </label>
+        <label class="flex items-center gap-1.5 text-xs cursor-pointer">
+          <input type="checkbox" ${b.protege?'checked':''} onchange="updateBuilding(${b.id},'protege',this.checked)" class="accent-blue-500">
+          <span class="text-blue-700 font-medium">Bâtiment protégé (patrimoine)</span>
+        </label>
+      </div>
+      <div class="mt-2 p-2 bg-green-50 rounded flex justify-between items-center">
         <button onclick="removeBuilding(${b.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
-        <span class="text-xs text-gray-500">Taux : ${(BLDG_CAP_RATES[b.etat].rate*100).toFixed(1)}%</span>
-        <span class="text-sm font-bold text-green-800">VR : ${fmtCHF(b.vr)}</span>
+        <span class="text-xs text-gray-500">Taux : ${(BLDG_CAP_RATES[b.etat].rate*100).toFixed(1)}%${b.surdimensionne?' · ⚠ surdimensionné':''}${b.sansDroit?' · ✗ non valorisable':''}</span>
+        <span class="text-sm font-bold text-green-800">VR : ${b.sansDroit?'–':fmtCHF(b.vr)}</span>
       </div>
     </div>
   `).join('');
@@ -1377,6 +1678,8 @@ function updateOtherEl(id, field, value) {
 // ============================================================
 function getGrandTotal() {
   const vrSol = parcels.reduce((s,p) => s + p.vr, 0);
+    const vrAlpages = alpages.reduce((s,a) => s + a.vr, 0);
+    const vrEnergie = installationsEnergie.reduce((s,e) => s + e.vr, 0);
   const vrCulturesSpeciales = culturesSpeciales.reduce((s,c) => s + c.vr, 0);
   const logCE = getLogCEVR();
   const logOther = otherLogements.reduce((s,l) => s + l.vr, 0);
@@ -1387,16 +1690,17 @@ function getGrandTotal() {
   // Plus-values et moins-values : font partie de la base agricole (CHF)
   const plusMinusNet = plusMinusValues.reduce((s,v) => s + (v.sens === 'moins' ? -Math.abs(v.montant) : Math.abs(v.montant)), 0);
 
-  const total = vrSol + vrCulturesSpeciales + logCE + logOther + batiments + foret + nonAgri + plusMinusNet;
+  const total = vrSol + vrAlpages + vrCulturesSpeciales + logCE + logOther + batiments + foret + nonAgri + vrEnergie + plusMinusNet;
+    const vrZAB = parcellesZAB.reduce((s,z) => s + z.valeurVenale, 0);
 
   // Charge maximale (art. 73 LDFR) :
   // Base agricole = tout sauf autres logements et éléments non agricoles (art. 10 al. 3).
   // Les plus/moins-values s'appliquent sur des éléments agricoles → incluses dans la base × 1.35.
-  const vrPurementAgricole = total - logOther - nonAgri;
+  const vrPurementAgricole = total - logOther - nonAgri - vrEnergie;
   const chargeMaximale = Math.round(vrPurementAgricole * 1.35 + logOther + nonAgri);
 
-  return {vrSol, vrCulturesSpeciales, logCE, logOther, batiments, foret, nonAgri,
-    plusMinusNet, total, chargeMaximale, vrPurementAgricole};
+  return {vrSol, vrAlpages, vrCulturesSpeciales, logCE, logOther, batiments, foret, nonAgri,
+    vrEnergie, plusMinusNet, total, vrZAB, chargeMaximale, vrPurementAgricole};
 }
 
 function updateResults() {
@@ -2418,6 +2722,517 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateStepUI();
 });
+
+// ══════════════════════════════════════════════
+// DROITS D'ALPAGE
+// ══════════════════════════════════════════════
+function addAlpage() {
+  const id = ++alpageCounter;
+  alpages.push({id, description: '', ugb: 0, fermageHa: 120, vr: 0});
+  renderAlpages();
+}
+function removeAlpage(id) {
+  alpages = alpages.filter(x => x.id !== id);
+  renderAlpages();
+  updateTotalsStep2();
+}
+function updateAlpage(id, field, val) {
+  const a = alpages.find(x => x.id === id);
+  if (!a) return;
+  a[field] = val;
+  // VR = (UGB × fermage/UGB) / taux_capitalisation (4.24%)
+  a.vr = Math.round((a.ugb * a.fermageHa) / CAP_RATE_LOG);
+  renderAlpages();
+  updateTotalsStep2();
+}
+function renderAlpages() {
+  const c = document.getElementById('alpages-container');
+  if (!c) return;
+  if (alpages.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucun droit d'alpage saisi.</p>';
+    return;
+  }
+  c.innerHTML = alpages.map(a => `
+    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-3">
+      <div class="grid grid-cols-4 gap-3 items-end">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description (alpage / parcelle)</label>
+          <input type="text" value="${a.description}" placeholder="Ex. Alpage de la Cerniat, 3 ares pâturables"
+            onchange="updateAlpage(${a.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">UGB / NS estivées</label>
+          <input type="number" value="${a.ugb}" min="0" step="0.5"
+            onchange="updateAlpage(${a.id},'ugb',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Fermage / UGB (CHF/an)</label>
+          <input type="number" value="${a.fermageHa}" min="0" step="5"
+            onchange="updateAlpage(${a.id},'fermageHa',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-2 p-2 bg-purple-100 rounded flex justify-between items-center">
+        <button onclick="removeAlpage(${a.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+        <span class="text-xs text-gray-500">${a.ugb} UGB × CHF ${a.fermageHa} ÷ 4.24% = VR :</span>
+        <span class="text-sm font-bold text-purple-800">${fmtCHF(a.vr)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+function updateTotalsStep2() {
+  const totalAlpages = alpages.reduce((s,a) => s + a.vr, 0);
+  const el = document.getElementById('total-vr-alpages');
+  if (el) el.textContent = fmtCHF(totalAlpages);
+  const totalZAB = parcellesZAB.reduce((s,z) => s + z.valeurVenale, 0);
+  const elz = document.getElementById('total-vr-zab');
+  if (elz) elz.textContent = fmtCHF(totalZAB);
+}
+
+// ══════════════════════════════════════════════
+// ZONES À BÂTIR (ZAB)
+// ══════════════════════════════════════════════
+function addZAB() {
+  const id = ++zabCounter;
+  parcellesZAB.push({id, parcelNo: '', description: '', surfaceM2: 0, zone: 'Zr', prixM2: 200, valeurVenale: 0});
+  renderZAB();
+}
+function removeZAB(id) {
+  parcellesZAB = parcellesZAB.filter(x => x.id !== id);
+  renderZAB();
+  updateTotalsStep2();
+}
+function updateZAB(id, field, val) {
+  const z = parcellesZAB.find(x => x.id === id);
+  if (!z) return;
+  z[field] = val;
+  z.valeurVenale = Math.round(z.surfaceM2 * z.prixM2);
+  renderZAB();
+  updateTotalsStep2();
+}
+function renderZAB() {
+  const c = document.getElementById('zab-container');
+  if (!c) return;
+  if (parcellesZAB.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucune parcelle en zone à bâtir saisie.</p>';
+    return;
+  }
+  c.innerHTML = parcellesZAB.map(z => `
+    <div class="rounded-lg p-4 mb-3" style="background:#fff7ed;border:1px solid #fb923c">
+      <div class="grid grid-cols-4 gap-3 items-end">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">N° parcelle RF</label>
+          <input type="text" value="${z.parcelNo}" placeholder="Ex. 1456"
+            onchange="updateZAB(${z.id},'parcelNo',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Zone</label>
+          <select onchange="updateZAB(${z.id},'zone',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="Zr" ${z.zone==='Zr'?'selected':''}>Zone résidentielle (Zr)</option>
+            <option value="Zm" ${z.zone==='Zm'?'selected':''}>Zone mixte (Zm)</option>
+            <option value="Za" ${z.zone==='Za'?'selected':''}>Zone artisanale (Za)</option>
+            <option value="Zi" ${z.zone==='Zi'?'selected':''}>Zone industrielle (Zi)</option>
+            <option value="autre" ${z.zone==='autre'?'selected':''}>Autre zone</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Surface (m²)</label>
+          <input type="number" value="${z.surfaceM2}" min="0" step="1"
+            onchange="updateZAB(${z.id},'surfaceM2',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Prix estimé (CHF/m²)</label>
+          <input type="number" value="${z.prixM2}" min="0" step="10"
+            onchange="updateZAB(${z.id},'prixM2',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-2 p-2 rounded flex justify-between items-center" style="background:#fed7aa">
+        <button onclick="removeZAB(${z.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+        <span class="text-xs text-gray-600">${z.surfaceM2} m² × CHF ${z.prixM2}/m² = valeur vénale :</span>
+        <span class="text-sm font-bold text-orange-800">${fmtCHF(z.valeurVenale)} <span class="text-xs font-normal text-gray-500">(hors VRA)</span></span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+// INSTALLATIONS ÉNERGIE (PV, biogaz...)
+// ══════════════════════════════════════════════
+function addEnergie() {
+  const id = ++energieCounter;
+  installationsEnergie.push({id, description: '', type: 'pv', revenuAnnuel: 0, tauxCap: 6.0, vr: 0});
+  renderEnergie();
+}
+function removeEnergie(id) {
+  installationsEnergie = installationsEnergie.filter(x => x.id !== id);
+  renderEnergie();
+  updateEnergieTotal();
+}
+function updateEnergie(id, field, val) {
+  const e = installationsEnergie.find(x => x.id === id);
+  if (!e) return;
+  e[field] = val;
+  e.vr = Math.round(e.revenuAnnuel / (e.tauxCap / 100));
+  renderEnergie();
+  updateEnergieTotal();
+}
+function renderEnergie() {
+  const c = document.getElementById('energie-container');
+  if (!c) return;
+  if (installationsEnergie.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucune installation saisie.</p>';
+    return;
+  }
+  c.innerHTML = installationsEnergie.map(e => `
+    <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-3">
+      <div class="grid grid-cols-4 gap-3 items-end">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+          <input type="text" value="${e.description}" placeholder="Ex. 120 m² PV toiture grange, contrat 25 ans"
+            onchange="updateEnergie(${e.id},'description',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Revenu net annuel (CHF)</label>
+          <input type="number" value="${e.revenuAnnuel}" min="0" step="100"
+            onchange="updateEnergie(${e.id},'revenuAnnuel',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Taux capitalisation (%)</label>
+          <input type="number" value="${e.tauxCap}" min="1" max="15" step="0.5"
+            onchange="updateEnergie(${e.id},'tauxCap',parseFloat(this.value)||6)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-2 p-2 bg-yellow-100 rounded flex justify-between items-center">
+        <button onclick="removeEnergie(${e.id})" class="btn-danger px-2 py-1 rounded text-xs">Supprimer</button>
+        <span class="text-xs text-gray-500">CHF ${e.revenuAnnuel}/an ÷ ${e.tauxCap}% = VR :</span>
+        <span class="text-sm font-bold text-yellow-700">${fmtCHF(e.vr)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+function updateEnergieTotal() {
+  const total = installationsEnergie.reduce((s,e) => s + e.vr, 0);
+  const el = document.getElementById('total-vr-energie');
+  if (el) el.textContent = fmtCHF(total);
+}
+
+// ══════════════════════════════════════════════
+// REGISTRE FONCIER — Servitudes
+// ══════════════════════════════════════════════
+function addServitude() {
+  const id = ++servitudeCounter;
+  servitudes.push({id, type: 'passage', ayant_droit: '', description: '', impact: 'faible'});
+  renderServitudes();
+}
+function removeServitude(id) {
+  servitudes = servitudes.filter(x => x.id !== id);
+  renderServitudes();
+}
+function updateServitude(id, field, val) {
+  const s = servitudes.find(x => x.id === id);
+  if (s) { s[field] = val; renderServitudes(); }
+}
+function renderServitudes() {
+  const c = document.getElementById('servitudes-container');
+  if (!c) return;
+  if (servitudes.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucune servitude inscrite.</p>';
+    return;
+  }
+  const IMPACT_COLORS = {faible:'bg-green-50 text-green-700', moyen:'bg-yellow-50 text-yellow-700', fort:'bg-red-50 text-red-700'};
+  c.innerHTML = servitudes.map(s => `
+    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2 grid grid-cols-4 gap-3 items-end">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
+        <select onchange="updateServitude(${s.id},'type',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+          <option value="passage" ${s.type==='passage'?'selected':''}>Droit de passage</option>
+          <option value="eau" ${s.type==='eau'?'selected':''}>Droit d'eau / aqueduc</option>
+          <option value="conduite" ${s.type==='conduite'?'selected':''}>Droit pour conduites</option>
+          <option value="vue" ${s.type==='vue'?'selected':''}>Servitude de vue</option>
+          <option value="construction" ${s.type==='construction'?'selected':''}>Restriction de construction</option>
+          <option value="autre" ${s.type==='autre'?'selected':''}>Autre</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Ayant droit / bénéficiaire</label>
+        <input type="text" value="${s.ayant_droit}" placeholder="Ex. Commune de X, SN voisin"
+          onchange="updateServitude(${s.id},'ayant_droit',this.value)"
+          class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+        <input type="text" value="${s.description}" placeholder="Ex. Chemin de 3 m sur parcelle 1234"
+          onchange="updateServitude(${s.id},'description',this.value)"
+          class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+      </div>
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Impact VRA</label>
+          <select onchange="updateServitude(${s.id},'impact',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+            <option value="faible" ${s.impact==='faible'?'selected':''}>Faible</option>
+            <option value="moyen" ${s.impact==='moyen'?'selected':''}>Moyen</option>
+            <option value="fort" ${s.impact==='fort'?'selected':''}>Fort</option>
+          </select>
+        </div>
+        <button onclick="removeServitude(${s.id})" class="btn-danger px-2 py-1 rounded text-xs mb-0.5">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+// REGISTRE FONCIER — Annotations
+// ══════════════════════════════════════════════
+function addAnnotation() {
+  const id = ++annotationCounter;
+  annotations.push({id, type: 'sitex', description: '', parcelles: ''});
+  renderAnnotations();
+}
+function removeAnnotation(id) {
+  annotations = annotations.filter(x => x.id !== id);
+  renderAnnotations();
+}
+function updateAnnotation(id, field, val) {
+  const a = annotations.find(x => x.id === id);
+  if (a) { a[field] = val; renderAnnotations(); }
+}
+function renderAnnotations() {
+  const c = document.getElementById('annotations-container');
+  if (!c) return;
+  if (annotations.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucune annotation inscrite.</p>';
+    return;
+  }
+  c.innerHTML = annotations.map(a => `
+    <div class="rounded-lg p-3 mb-2 grid grid-cols-4 gap-3 items-end" style="background:#fff7ed;border:1px solid #fb923c">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
+        <select onchange="updateAnnotation(${a.id},'type',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+          <option value="sitex" ${a.type==='sitex'?'selected':''}>SITEX / zone source</option>
+          <option value="zone_eau_s1" ${a.type==='zone_eau_s1'?'selected':''}>Zone protection eau S1</option>
+          <option value="zone_eau_s2" ${a.type==='zone_eau_s2'?'selected':''}>Zone protection eau S2</option>
+          <option value="zone_eau_s3" ${a.type==='zone_eau_s3'?'selected':''}>Zone protection eau S3</option>
+          <option value="foret" ${a.type==='foret'?'selected':''}>Restriction forestière</option>
+          <option value="inventaire" ${a.type==='inventaire'?'selected':''}>Inventaire patrimoine</option>
+          <option value="autre" ${a.type==='autre'?'selected':''}>Autre</option>
+        </select>
+      </div>
+      <div class="col-span-2">
+        <label class="block text-xs font-medium text-gray-600 mb-1">Description / remarque</label>
+        <input type="text" value="${a.description}" placeholder="Ex. Source à protéger sur parcelle nord"
+          onchange="updateAnnotation(${a.id},'description',this.value)"
+          class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+      </div>
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Parcelle(s) concernée(s)</label>
+          <input type="text" value="${a.parcelles}" placeholder="Ex. 1234"
+            onchange="updateAnnotation(${a.id},'parcelles',this.value)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <button onclick="removeAnnotation(${a.id})" class="btn-danger px-2 py-1 rounded text-xs mb-0.5">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+// REGISTRE FONCIER — DDP
+// ══════════════════════════════════════════════
+function addDDP() {
+  const id = ++ddpCounter;
+  ddps.push({id, description: '', superficiaireNom: '', dureeRestante: 0, renteAnnuelle: 0});
+  renderDDPs();
+}
+function removeDDP(id) {
+  ddps = ddps.filter(x => x.id !== id);
+  renderDDPs();
+}
+function updateDDP(id, field, val) {
+  const d = ddps.find(x => x.id === id);
+  if (d) { d[field] = val; renderDDPs(); }
+}
+function renderDDPs() {
+  const c = document.getElementById('ddp-container');
+  if (!c) return;
+  if (ddps.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucun DDP inscrit.</p>';
+    return;
+  }
+  c.innerHTML = ddps.map(d => `
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2 grid grid-cols-4 gap-3 items-end">
+      <div class="col-span-2">
+        <label class="block text-xs font-medium text-gray-600 mb-1">Description / objet</label>
+        <input type="text" value="${d.description}" placeholder="Ex. DDP pour chalet d'alpage, parcelle 5678"
+          onchange="updateDDP(${d.id},'description',this.value)"
+          class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Superficiaire</label>
+        <input type="text" value="${d.superficiaireNom}" placeholder="Nom"
+          onchange="updateDDP(${d.id},'superficiaireNom',this.value)"
+          class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+      </div>
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Durée restante (ans)</label>
+          <input type="number" value="${d.dureeRestante}" min="0" step="1"
+            onchange="updateDDP(${d.id},'dureeRestante',parseFloat(this.value)||0)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <button onclick="removeDDP(${d.id})" class="btn-danger px-2 py-1 rounded text-xs mb-0.5">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+// REGISTRE FONCIER — Hypothèques
+// ══════════════════════════════════════════════
+function addHypotheque() {
+  const id = ++hypothequeCounter;
+  hypotheques.push({id, type: 'cedulehyp', creancier: '', montant: 0, rang: 1});
+  renderHypotheques();
+  updateHypothequeTotal();
+}
+function removeHypotheque(id) {
+  hypotheques = hypotheques.filter(x => x.id !== id);
+  renderHypotheques();
+  updateHypothequeTotal();
+}
+function updateHypotheque(id, field, val) {
+  const h2 = hypotheques.find(x => x.id === id);
+  if (h2) { h2[field] = val; renderHypotheques(); updateHypothequeTotal(); }
+}
+function renderHypotheques() {
+  const c = document.getElementById('hypotheques-container');
+  if (!c) return;
+  if (hypotheques.length === 0) {
+    c.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Aucune hypothèque inscrite.</p>';
+    return;
+  }
+  c.innerHTML = hypotheques.map(hh => `
+    <div class="bg-gray-50 border border-gray-300 rounded-lg p-3 mb-2 grid grid-cols-4 gap-3 items-end">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
+        <select onchange="updateHypotheque(${hh.id},'type',this.value)" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+          <option value="cedulehyp" ${hh.type==='cedulehyp'?'selected':''}>Cédule hypothécaire</option>
+          <option value="hypotheque" ${hh.type==='hypotheque'?'selected':''}>Hypothèque</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Créancier</label>
+        <input type="text" value="${hh.creancier}" placeholder="Ex. BCV, Raiffeisen"
+          onchange="updateHypotheque(${hh.id},'creancier',this.value)"
+          class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Montant (CHF)</label>
+        <input type="number" value="${hh.montant}" min="0" step="1000"
+          onchange="updateHypotheque(${hh.id},'montant',parseFloat(this.value)||0)"
+          class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+      </div>
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Rang</label>
+          <input type="number" value="${hh.rang}" min="1" step="1"
+            onchange="updateHypotheque(${hh.id},'rang',parseInt(this.value)||1)"
+            class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+        </div>
+        <button onclick="removeHypotheque(${hh.id})" class="btn-danger px-2 py-1 rounded text-xs mb-0.5">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+function updateHypothequeTotal() {
+  const total = hypotheques.reduce((s,hh) => s + hh.montant, 0);
+  const el = document.getElementById('total-hypotheques');
+  if (el) el.textContent = fmtCHF(total);
+  // Compare with charge maximale if available
+  const gt = getGrandTotal();
+  const elCM = document.getElementById('charge-max-rf');
+  if (elCM) elCM.textContent = fmtCHF(gt.chargeMaximale);
+  const elAlert = document.getElementById('charge-max-alert');
+  if (elAlert) {
+    if (total > gt.chargeMaximale && gt.chargeMaximale > 0) {
+      elAlert.className = 'text-xs p-2 rounded mt-1 bg-red-100 text-red-700 border border-red-300';
+      elAlert.textContent = '⚠ Les hypothèques existantes (' + fmtCHF(total) + ') dépassent la charge maximale LDFR art. 73 (' + fmtCHF(gt.chargeMaximale) + '). Un crédit agricole supplémentaire ne pourrait pas être garanti.';
+    } else if (gt.chargeMaximale > 0) {
+      const marge = gt.chargeMaximale - total;
+      elAlert.className = 'text-xs p-2 rounded mt-1 bg-green-100 text-green-700 border border-green-300';
+      elAlert.textContent = '✓ Marge disponible pour crédit agricole supplémentaire : ' + fmtCHF(marge);
+    }
+    elAlert.classList.remove('hidden');
+  }
+}
+
+// ══════════════════════════════════════════════
+// PHOTOS
+// ══════════════════════════════════════════════
+function handlePhotoUpload(input) {
+  const cat = document.getElementById('photo-categorie').value;
+  const leg = document.getElementById('photo-legende').value || '';
+  const files = Array.from(input.files);
+  files.forEach(file => {
+    if (file.size > 5 * 1024 * 1024) { alert('Photo trop grande : ' + file.name + ' (max 5 Mo)'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const id = ++photoCounter;
+      photos.push({id, categorie: cat, legende: leg, dataUrl: e.target.result, filename: file.name});
+      renderPhotos();
+      updatePhotoStats();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+  document.getElementById('photo-legende').value = '';
+}
+function removePhoto(id) {
+  photos = photos.filter(p => p.id !== id);
+  renderPhotos();
+  updatePhotoStats();
+}
+function updatePhotoLegende(id, val) {
+  const p = photos.find(x => x.id === id);
+  if (p) { p.legende = val; }
+}
+function renderPhotos() {
+  const c = document.getElementById('photos-grid');
+  if (!c) return;
+  if (photos.length === 0) {
+    c.innerHTML = '<p class="col-span-3 text-xs text-gray-400 italic py-4 text-center">Aucune photo ajoutée. Cliquez sur "Ajouter photo(s)" ci-dessus.</p>';
+    return;
+  }
+  c.innerHTML = photos.map(p => `
+    <div class="relative rounded-lg overflow-hidden border border-gray-200 bg-white shadow-sm">
+      <img src="${p.dataUrl}" class="w-full h-40 object-cover">
+      <div class="p-2">
+        <input type="text" value="${p.legende}" placeholder="Légende..."
+          onchange="updatePhotoLegende(${p.id},this.value)"
+          class="w-full text-xs border border-gray-200 rounded px-2 py-1 mb-1">
+        <span class="text-xs text-gray-400">${p.categorie.replace(/_ph$/,'').replace(/_/,' ')}</span>
+      </div>
+      <button onclick="removePhoto(${p.id})" class="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+    </div>
+  `).join('');
+}
+function updatePhotoStats() {
+  const cats = ['vue_generale','logement_ph','batiment_ph','surface_ph','equipement_ph','justificatif_ph'];
+  cats.forEach(cat => {
+    const cnt = photos.filter(p => p.categorie === cat).length;
+    const el = document.getElementById('count-' + cat);
+    if (el) el.textContent = cnt + ' photo(s)';
+  });
+}
+
 </script>
 </body>
 </html>
