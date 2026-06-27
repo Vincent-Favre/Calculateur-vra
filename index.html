@@ -2363,11 +2363,11 @@ const HELP_TOPICS = {
   },
   entreprise_agricole: {
     title: 'Entreprise agricole — définition légale',
-    loi: 'LDFR art. 7 al. 1 · Seuil USMO (Unité Standard de Main-d\'Œuvre)',
-    text: `<p>Selon l'<strong>art. 7 LDFR</strong>, une entreprise agricole est un ensemble de biens-fonds agricoles dont l'exploitation représente au moins une <strong>USMO</strong> (Unité Standard de Main-d'Œuvre).</p>
-<p style="margin-top:8px"><strong>1 USMO ≈ 2 200 heures de travail annuelles.</strong><br>En pratique, environ 15–20 ha de grandes cultures ou 25–35 vaches laitières ou 30–40 ha de prairies.</p>
+    loi: 'LDFR art. 7 al. 1 · Seuil UMOS (Unité Standard de Main-d\'Œuvre)',
+    text: `<p>Selon l'<strong>art. 7 LDFR</strong>, une entreprise agricole est un ensemble de biens-fonds agricoles dont l'exploitation représente au moins une <strong>UMOS</strong> (Unité Standard de Main-d'Œuvre).</p>
+<p style="margin-top:8px"><strong>1 UMOS ≈ 2 200 heures de travail annuelles.</strong><br>En pratique, environ 15–20 ha de grandes cultures ou 25–35 vaches laitières ou 30–40 ha de prairies.</p>
 <p style="margin-top:8px;background:#fef9c3;padding:8px;border-radius:4px"><strong>⚠ Distinction importante :</strong><br>
-Si le bien <em>n'atteint pas</em> le seuil USMO, il constitue un simple <strong>immeuble agricole</strong> et non une entreprise. Les règles de prix, de droit de préemption et de transfert diffèrent (LDFR art. 63 ss).<br>
+Si le bien <em>n'atteint pas</em> le seuil UMOS, il constitue un simple <strong>immeuble agricole</strong> et non une entreprise. Les règles de prix, de droit de préemption et de transfert diffèrent (LDFR art. 63 ss).<br>
 En cas de doute, contacter la Commission foncière cantonale.</p>
 <p style="margin-top:8px">Pour les exploitations mixtes (agri + viti, agri + agritourisme), les éléments accessoires restent inclus (art. 7 al. 4).</p>`,
     visite: `<strong>À vérifier sur place :</strong><br>
@@ -2375,7 +2375,7 @@ En cas de doute, contacter la Commission foncière cantonale.</p>
 • Activités annexes et leur importance relative<br>
 • Bail à ferme en cours : qui exploite ? Depuis quand ?<br>
 • Statut de l'exploitant (propriétaire, successeur désigné)<br>
-• Demander le plus récent calcul USMO (souvent disponible à la caisse maladie agricole)`
+• Demander le plus récent calcul UMOS (souvent disponible à la caisse maladie agricole)`
   },
   zone_climatique: {
     title: 'Zone climatique agricole — tableau VR de base',
@@ -2500,7 +2500,7 @@ En cas de doute, contacter la Commission foncière cantonale.</p>
   2. VR logement CE = Valeur locative ÷ 4.24%
 </div>
 <p><strong>Limite légale :</strong> Maximum <strong>14 UL</strong> évaluées au taux agricole (CHF 6.40/pt/UL).<br>Au-delà de 14 UL : taux non agricole CHF 12.80/pt/UL.</p>
-<p style="margin-top:8px;background:#fef9c3;padding:8px;border-radius:4px;font-size:12px"><strong>Conditions (LDFR art. 7) :</strong> Le logement doit être effectivement occupé par l'exploitant. L'exploitation doit atteindre le seuil USMO. Si l'exploitant est à la retraite et que le successeur n'est pas encore en place, la règle peut être différente.</p>`,
+<p style="margin-top:8px;background:#fef9c3;padding:8px;border-radius:4px;font-size:12px"><strong>Conditions (LDFR art. 7) :</strong> Le logement doit être effectivement occupé par l'exploitant. L'exploitation doit atteindre le seuil UMOS. Si l'exploitant est à la retraite et que le successeur n'est pas encore en place, la règle peut être différente.</p>`,
     visite: `<strong>À vérifier sur place :</strong><br>
 • L'exploitant réside-t-il effectivement dans ce logement ?<br>
 • Compter le nombre de pièces habitables (voir aide UL)<br>
@@ -2669,6 +2669,31 @@ En cas de doute, contacter la Commission foncière cantonale.</p>
 • Fermage cantonal de référence en vigueur pour la zone`
   },
 
+  droits_alpage: {
+    title: "Droits d'alpage / surfaces d'estivage",
+    loi: "LDFR art. 6 · ODFR art. 1 al. 2 · tables zones C–G",
+    text: `<p>Les <strong>droits d'alpage</strong> (ou surfaces d'estivage) sont des biens-fonds affectés à l'estivage du bétail. Ils sont soumis à la LDFR et évalués selon les tables ODFR pour les zones climatiques C à G.</p>
+<p style="margin-top:8px"><strong>Méthode de capitalisation :</strong> VR = (UGB × fermage annuel par UGB) ÷ taux de capitalisation (4.24%). Le fermage de référence est celui pratiqué pour des droits d'alpage comparables dans la région.</p>
+<p style="margin-top:8px"><strong>UGB / NS :</strong> une UGB (Unité Gros Bétail) ou NS (Normalstoss) représente la charge d'estivage standard. Se référer au plan d'estivage cantonal ou à la décision d'estivage de l'office cantonal.</p>
+<p style="margin-top:8px;background:#f3e8ff;padding:8px;border-radius:4px;font-size:12px"><strong>Cas particulier :</strong> si l'alpage comporte un bâtiment (chalet, étable), sa valeur est estimée séparément comme bâtiment d'exploitation.</p>`
+  },
+  zone_batir: {
+    title: "Surfaces en zone à bâtir (ZAB)",
+    loi: "LDFR art. 2 al. 2 · LAT art. 14 et ss.",
+    text: `<p>Les parcelles ou parties de parcelles <strong>classées en zone à bâtir</strong> selon le plan d'affectation communal sont exclues du champ d'application de la LDFR (art. 2 al. 2 let. b LDFR).</p>
+<p style="margin-top:8px"><strong>Conséquence :</strong> ces surfaces ne sont <em>pas</em> incluses dans la valeur de rendement agricole. Elles sont valorisées séparément à la valeur vénale du marché immobilier local et mentionnées à titre informatif dans le rapport.</p>
+<p style="margin-top:8px"><strong>Source du prix :</strong> se référer aux transactions comparables locales, aux données du canton ou à une estimation de valeur vénale spécifique. Indiquer si le prix tient compte d'une équipement (route, réseaux) ou non.</p>
+<p style="margin-top:8px;background:#fff7ed;padding:8px;border-radius:4px;font-size:12px"><strong>Attention :</strong> en cas de doute sur la limite de zone, consulter le plan cantonal et l'extrait RF. Une parcelle partiellement en zone à bâtir doit être divisée pour l'estimation.</p>`
+  },
+  energie_pv: {
+    title: "Installations de production d'énergie (PV, biogaz...)",
+    loi: "LDFR art. 10 al. 3 · Guide estimation ch. 4.3",
+    text: `<p>Les installations de production d'énergie sur les bâtiments ou surfaces agricoles (panneaux PV, biogaz, petit éolien) constituent un <strong>élément non agricole</strong> au sens de l'art. 10 al. 3 LDFR lorsqu'elles génèrent un revenu contractualisé indépendant.</p>
+<p style="margin-top:8px"><strong>Méthode :</strong> capitalisation du revenu net annuel (après charges d'entretien) au taux usuel pour les éléments non agricoles. Si le revenu est garanti par un contrat de rachat RPC/KEV, le taux peut être plus bas (6–8%). En l'absence de contrat, le risque est plus élevé (8–12%).</p>
+<p style="margin-top:8px"><strong>VR = revenu net annuel ÷ taux de capitalisation</strong></p>
+<p style="margin-top:8px"><strong>Intégration :</strong> la valeur est ajoutée hors base agricole — elle n'entre pas dans le calcul VRA × 1.35 de la charge maximale, mais s'additionne au total final (art. 73 al. 1 let. b LDFR).</p>
+<p style="margin-top:8px;background:#fefce8;padding:8px;border-radius:4px;font-size:12px"><strong>Documents à réclamer :</strong> contrat de rachat, décompte annuel ETC/SIG/DSR, puissance installée (kWc), orientation.</p>`
+  },
   plus_moins_values: {
     title: 'Plus-values et moins-values — corrections explicites',
     loi: 'Guide fédéral d\'estimation VRA (01.04.2018) § 4 · ODFR art. 7',
